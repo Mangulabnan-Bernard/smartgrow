@@ -121,25 +121,25 @@ const Archived: React.FC<ArchivedProps> = ({ lang, scans, sessions, onRestoreSca
         <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setConfirmTarget(null)}></div>
           <div className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl relative overflow-hidden p-8 text-center animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertCircle className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-black text-slate-800 mb-2">Are you sure?</h3>
+            <h3 className="text-xl font-black text-slate-800 mb-2">Delete {confirmTarget.name}?</h3>
             <p className="text-sm text-slate-500 font-medium mb-8">
-              This will permanently delete <span className="font-bold text-slate-800">"{confirmTarget.name}"</span>. This action cannot be undone.
+              This will permanently delete the selected item. This action cannot be undone.
             </p>
             <div className="flex flex-col gap-3">
               <button 
                 onClick={handleConfirmDelete}
                 className="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-lg shadow-red-100 hover:bg-red-700 active:scale-95 transition-all"
               >
-                {t.deletePermanently}
+                Yes, Delete
               </button>
               <button 
                 onClick={() => setConfirmTarget(null)}
                 className="w-full py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-all"
               >
-                Cancel
+                No, Cancel
               </button>
             </div>
           </div>

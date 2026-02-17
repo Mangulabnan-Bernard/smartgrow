@@ -123,7 +123,7 @@ const Profile: React.FC<ProfileProps> = ({
       <div className="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl relative overflow-hidden p-8">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary-100 text-primary-600 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-[var(--primary-100)] text-[var(--primary-600)] rounded-2xl flex items-center justify-center">
                 <HeartHandshake className="w-6 h-6" />
             </div>
             <div>
@@ -144,7 +144,7 @@ const Profile: React.FC<ProfileProps> = ({
                 <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-slate-50 rounded-2xl">
                         <p className="font-bold text-slate-800 text-xs mb-1">AI Powered</p>
-                        <p className="text-[10px] text-slate-500 leading-tight">State-of-the-art Gemini Vision engine.</p>
+                        <p className="text-[10px] text-slate-500 leading-tight">State-of-the-art</p>
                     </div>
                     <div className="p-4 bg-slate-50 rounded-2xl">
                         <p className="font-bold text-slate-800 text-xs mb-1">Sustainable</p>
@@ -180,16 +180,16 @@ const Profile: React.FC<ProfileProps> = ({
               }`}
             >
               <div className={`w-14 h-14 rounded-2xl ${p.color} flex items-center justify-center shadow-lg relative transition-all ${
-                stats.profileIcon === p.id ? 'ring-4 ring-primary-100' : ''
+                stats.profileIcon === p.id ? 'ring-4 ring-[var(--primary-100)]' : ''
               }`}>
                 <p.icon className="w-7 h-7 text-white" />
                 {stats.profileIcon === p.id && (
                     <div className="absolute bottom-1 right-1 bg-white rounded-full p-0.5 shadow-md">
-                        <CheckCircle2 className="w-3 h-3 text-primary-600" />
+                        <CheckCircle2 className="w-3 h-3 text-[var(--primary-600)]" />
                     </div>
                 )}
               </div>
-              <span className={`text-[9px] font-black uppercase tracking-tight text-center truncate w-full ${stats.profileIcon === p.id ? 'text-primary-600' : 'text-slate-400'}`}>
+              <span className={`text-[9px] font-black uppercase tracking-tight text-center truncate w-full ${stats.profileIcon === p.id ? 'text-[var(--primary-600)]' : 'text-slate-400'}`}>
                 {p.label.split(' ').pop()}
               </span>
             </button>
@@ -202,13 +202,13 @@ const Profile: React.FC<ProfileProps> = ({
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-500 pb-10 pt-4">
       <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary-50/50 to-transparent transition-colors duration-500"></div>
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[var(--primary-50)]/50 to-transparent transition-colors duration-500"></div>
         <div className="relative z-10 flex items-center justify-between gap-6">
           {/* Left Side: Name and Level */}
           <div className="flex flex-col text-left space-y-3 flex-1">
             <div>
               <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-none">{displayName}</h2>
-              <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-[9px] font-black mt-3 uppercase tracking-widest border border-primary-100 shadow-sm transition-colors duration-500">
+              <div className="inline-flex items-center gap-2 bg-[var(--primary-50)] text-[var(--primary-700)] px-3 py-1 rounded-full text-[9px] font-black mt-3 uppercase tracking-widest border border-[var(--primary-100)] shadow-sm transition-colors duration-500">
                 <Trophy className="w-3 h-3" />
                 LEVEL {stats.level}
               </div>
@@ -217,14 +217,14 @@ const Profile: React.FC<ProfileProps> = ({
             <div className="w-full">
               <div className="flex justify-between items-center mb-1.5">
                  <div className="flex items-center gap-1.5">
-                    <Zap className="w-3 h-3 text-primary-500 fill-current transition-colors duration-500" />
+                    <Zap className="w-3 h-3 text-[var(--primary-500)] fill-current transition-colors duration-500" />
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Growth</span>
                  </div>
                  <span className="text-[9px] font-bold text-slate-600">{stats.xp} / {nextLevelXp} XP</span>
               </div>
               <div className="h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-50 shadow-inner">
                 <div 
-                  className="h-full bg-gradient-to-r from-primary-400 to-primary-600 rounded-full transition-all duration-1000 shadow-sm" 
+                  className="h-full bg-gradient-to-r from-[var(--primary-400)] to-[var(--primary-600)] rounded-full transition-all duration-1000 shadow-sm" 
                   style={{ width: `${xpProgress}%` }}
                 ></div>
               </div>
@@ -237,7 +237,7 @@ const Profile: React.FC<ProfileProps> = ({
             className={`w-20 h-20 md:w-28 md:h-28 ${currentPersona.color} rounded-[2.5rem] border-[4px] border-white shadow-xl flex items-center justify-center text-white transition-all hover:scale-105 group relative shrink-0`}
           >
             <PersonaIcon className="w-8 h-8 md:w-12 md:h-12" />
-            <div className="absolute -bottom-0.5 -right-0.5 bg-primary-500 text-white p-1.5 rounded-lg shadow-lg border-2 border-white transition-colors duration-500">
+            <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--primary-500)] text-white p-1.5 rounded-lg shadow-lg border-2 border-white transition-colors duration-500">
                 <SettingsIcon className="w-3 h-3" />
             </div>
           </button>
@@ -261,7 +261,7 @@ const Profile: React.FC<ProfileProps> = ({
         <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-5 md:p-6 border-b border-slate-50">
              <div className="flex items-center gap-4 mb-5">
-                <div className="w-10 h-10 bg-primary-50 text-primary-600 rounded-xl flex items-center justify-center shadow-sm transition-colors duration-500">
+                <div className="w-10 h-10 bg-[var(--primary-50)] text-[var(--primary-600)] rounded-xl flex items-center justify-center shadow-sm transition-colors duration-500">
                    <Palette className="w-5 h-5" />
                 </div>
                 <div>

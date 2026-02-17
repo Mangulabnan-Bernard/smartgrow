@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, User as UserIcon, ArrowRight, Leaf, ShieldCheck, Sparkles, Contact, CheckCircle } from 'lucide-react';
 import { Language } from '../types';
 import { storageService } from '../services/storageService';
+import { firebaseService } from '../services/firebaseService';
 
 interface AuthModalProps {
   onSuccess: () => void;
@@ -12,91 +13,88 @@ interface AuthModalProps {
 const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, lang }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [fullName, setFullName] = useState('');
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Simulate network delay
-    setTimeout(() => {
-      const usersData = localStorage.getItem('smartgrow_users');
-      const users = usersData ? JSON.parse(usersData) : {};
-      const userProfilesData = localStorage.getItem('smartgrow_profiles') || '{}';
-      const userProfiles = JSON.parse(userProfilesData);
-
+    try {
       if (isLogin) {
-        if (users[username] && users[username] === password) {
-          // Success: Set stats for this user
-          const existingStats = localStorage.getItem(`smartgrow_stats_${username}`);
-          if (existingStats) {
-            localStorage.setItem('smartgrow_user_stats', existingStats);
-          } else {
-            // Re-init if stats missing
-            const profile = userProfiles[username] || {};
-            storageService.saveUserStats({
-              username,
-              fullName: profile.fullName || username,
-              xp: 0,
-              level: 1,
-              scansCount: 0,
-              sessionsCount: 0,
-              profileIcon: 'Persona1',
-              lastAction: 'Welcome back!'
-            });
-          }
-          onSuccess();
+        // Sign in with Firebase
+        const profile = await firebaseService.signIn(email, password);
+        
+        // Load or initialize user stats
+        const existingStats = localStorage.getItem(`smartgrow_stats_${profile.uid}`);
+        if (existingStats) {
+          localStorage.setItem('smartgrow_user_stats', existingStats);
         } else {
-          setError('Invalid username or password.');
-          setLoading(false);
-        }
-      } else {
-        // Signup validation
-        if (users[username]) {
-          setError('Username already exists.');
-          setLoading(false);
-        } else if (fullName.length < 2) {
-          setError('Please enter your full name.');
-          setLoading(false);
-        } else if (username.length < 3) {
-          setError('Username must be at least 3 characters.');
-          setLoading(false);
-        } else if (password.length < 4) {
-          setError('Password must be at least 4 characters.');
-          setLoading(false);
-        } else if (password !== confirmPassword) {
-          setError('Passwords do not match.');
-          setLoading(false);
-        } else {
-          // Create user
-          users[username] = password;
-          userProfiles[username] = { fullName };
-          localStorage.setItem('smartgrow_users', JSON.stringify(users));
-          localStorage.setItem('smartgrow_profiles', JSON.stringify(userProfiles));
-          
           // Initialize fresh stats for new user
           const initialStats = {
-            username,
-            fullName,
+            username: profile.email.split('@')[0],
+            fullName: profile.displayName || profile.email.split('@')[0],
             xp: 0,
             level: 1,
             scansCount: 0,
             sessionsCount: 0,
             profileIcon: 'Persona1',
-            lastAction: 'First time joining SmartGrow!'
+            lastAction: 'Welcome back!'
           };
           storageService.saveUserStats(initialStats);
-          localStorage.setItem(`smartgrow_stats_${username}`, JSON.stringify(initialStats));
-          
-          onSuccess();
+          localStorage.setItem(`smartgrow_stats_${profile.uid}`, JSON.stringify(initialStats));
         }
+        
+        // Store current user session
+        localStorage.setItem('smartgrow_current_user', JSON.stringify(profile));
+        onSuccess();
+      } else {
+        // Sign up with Firebase
+        if (fullName.length < 2) {
+          setError('Please enter your full name.');
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          setError('Password must be at least 6 characters.');
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('Passwords do not match.');
+          setLoading(false);
+          return;
+        }
+        
+        const profile = await firebaseService.signUp(email, password, fullName);
+        
+        // Initialize fresh stats for new user
+        const initialStats = {
+          username: profile.email.split('@')[0],
+          fullName: profile.displayName || fullName,
+          xp: 0,
+          level: 1,
+          scansCount: 0,
+          sessionsCount: 0,
+          profileIcon: 'Persona1',
+          lastAction: 'First time joining SmartGrow!'
+        };
+        storageService.saveUserStats(initialStats);
+        localStorage.setItem(`smartgrow_stats_${profile.uid}`, JSON.stringify(initialStats));
+        
+        // Store current user session
+        localStorage.setItem('smartgrow_current_user', JSON.stringify(profile));
+        onSuccess();
       }
-    }, 1000);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during authentication.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -184,14 +182,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, lang }) => {
             )}
 
             <div className="space-y-1.5 animate-in fade-in slide-in-from-left duration-300 stagger-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Username</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
               <div className="relative group">
-                <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
                 <input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="TheBotanist" 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="john@example.com" 
                   required
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
                 />
@@ -259,6 +257,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, lang }) => {
                   setError(null); 
                   setPassword(''); 
                   setConfirmPassword('');
+                  setEmail('');
               }}
               className="text-sm font-bold text-slate-400 hover:text-green-600 transition-colors py-2"
             >

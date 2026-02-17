@@ -16,7 +16,7 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
   const t = TRANSLATIONS[lang];
 
   const severityColor = {
-    Healthy: 'text-primary-600 bg-primary-50',
+    Healthy: 'text-[var(--primary-600)] bg-[var(--primary-50)]',
     Mild: 'text-yellow-600 bg-yellow-50',
     Moderate: 'text-orange-600 bg-orange-50',
     Severe: 'text-red-600 bg-red-50'
@@ -73,11 +73,11 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-[1.2rem] text-sm font-black transition-all duration-300 ${
                       activeTab === tab.id 
-                        ? 'bg-white text-primary-700 shadow-md shadow-slate-200/50 translate-y-0' 
+                        ? 'bg-white text-[var(--primary-700)] shadow-md shadow-slate-200/50 translate-y-0' 
                         : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
                     }`}
                   >
-                    <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-primary-500' : 'text-slate-400'}`} />
+                    <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-[var(--primary-500)]' : 'text-slate-400'}`} />
                     {tab.label}
                   </button>
                 ))}
@@ -91,7 +91,7 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
                     <h4 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">{t.diagnosis}</h4>
                     <p className="text-xl font-bold text-slate-800 leading-relaxed">{result.diagnosis}</p>
                     <div className="mt-4 flex items-center gap-4 text-xs text-slate-500 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <span className="font-bold text-primary-600">{Math.round(result.confidence * 100)}% Certain</span>
+                      <span className="font-bold text-[var(--primary-600)]">{Math.round(result.confidence * 100)}% Certain</span>
                       {result.stressFactor && <span className="text-slate-300">|</span>}
                       {result.stressFactor && <span className="font-medium">Why: {result.stressFactor}</span>}
                     </div>
@@ -111,10 +111,10 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
                           <p className="text-[9px] font-black text-blue-400 uppercase tracking-tighter">Hum</p>
                           <p className="text-sm font-black text-blue-700">{result.environment.humidity}%</p>
                         </div>
-                        <div className="p-4 bg-primary-50 rounded-2xl text-center">
-                          <Droplets className="w-5 h-5 text-primary-500 mx-auto mb-2" />
-                          <p className="text-[9px] font-black text-primary-400 uppercase tracking-tighter">Soil</p>
-                          <p className="text-sm font-black text-primary-700">{result.environment.soilMoisture}%</p>
+                        <div className="p-4 bg-[var(--primary-50)] rounded-2xl text-center">
+                          <Droplets className="w-5 h-5 text-[var(--primary-500)] mx-auto mb-2" />
+                          <p className="text-[9px] font-black text-[var(--primary-400)] uppercase tracking-tighter">Soil</p>
+                          <p className="text-sm font-black text-[var(--primary-700)]">{result.environment.soilMoisture}%</p>
                         </div>
                         <div className="p-4 bg-yellow-50 rounded-2xl text-center">
                           <Sun className="w-5 h-5 text-yellow-500 mx-auto mb-2" />
@@ -129,8 +129,8 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
                     <h4 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">Expert Tips</h4>
                     <div className="grid gap-3">
                       {result.powerTips.map((tip, i) => (
-                        <div key={i} className="flex gap-4 bg-primary-50/50 p-5 rounded-2xl border border-primary-100/50">
-                          <Sparkles className="w-5 h-5 text-primary-500 flex-shrink-0" />
+                        <div key={i} className="flex gap-4 bg-[var(--primary-50)]/50 p-5 rounded-2xl border border-[var(--primary-100)]/50">
+                          <Sparkles className="w-5 h-5 text-[var(--primary-500)] flex-shrink-0" />
                           <p className="text-slate-700 text-sm font-medium leading-relaxed">{tip}</p>
                         </div>
                       ))}
@@ -141,9 +141,9 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
 
               {activeTab === 'treatment' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="bg-primary-50 p-8 rounded-[2.5rem] border border-primary-100 transition-colors duration-500">
-                    <h4 className="text-primary-800 font-black mb-4 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary-600 shadow-sm transition-colors duration-500">
+                  <div className="bg-[var(--primary-50)] p-8 rounded-[2.5rem] border border-[var(--primary-100)] transition-colors duration-500">
+                    <h4 className="text-[var(--primary-800)] font-black mb-4 flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[var(--primary-600)] shadow-sm transition-colors duration-500">
                         <Check className="w-6 h-6" />
                       </div>
                       {t.organic} Ways
@@ -182,7 +182,7 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
               <div className="flex flex-col md:flex-row gap-3">
                 <button 
                   onClick={() => onSave(result, true)}
-                  className="flex-1 bg-primary-600 text-white px-8 py-5 rounded-3xl font-black text-lg shadow-xl shadow-primary-200 hover:bg-primary-700 active:scale-95 transition-all flex items-center justify-center gap-3 duration-500"
+                  className="flex-1 bg-[var(--primary-600)] text-white px-8 py-5 rounded-3xl font-black text-lg shadow-xl shadow-[var(--primary-200)] hover:bg-[var(--primary-700)] active:scale-95 transition-all flex items-center justify-center gap-3 duration-500"
                 >
                   <Activity className="w-6 h-6" />
                   {t.startMonitoring}

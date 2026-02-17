@@ -33,6 +33,7 @@ import AuthModal from './components/AuthModal';
 import Archived from './components/Archived';
 import LoadingScreen from './components/LoadingScreen';
 import { storageService } from './services/storageService';
+import { firebaseService } from './services/firebaseService';
 import { DiagnosisResult, MonitoringSession, AppAlert, UserStats, Language, EnvironmentalData, Page } from './types';
 import { TRANSLATIONS, THEME_CONFIGS } from './constants';
 
@@ -49,7 +50,8 @@ const App: React.FC = () => {
   const [userStats, setUserStats] = useState<UserStats>(storageService.getUserStats());
   const [language, setLanguage] = useState<Language>('en');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('smartgrow_session') === 'active';
+    // Check if Firebase user is authenticated
+    return firebaseService.isAuthenticated();
   });
   const [activeDiagnosis, setActiveDiagnosis] = useState<DiagnosisResult | null>(null);
   const [monitoringCtx, setMonitoringCtx] = useState<MonitoringContext | null>(null);
@@ -81,9 +83,25 @@ const App: React.FC = () => {
     return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
 
-  // Initialize app and hide loading screen
+  // Initialize app and check Firebase auth state
   useEffect(() => {
     const initializeApp = async () => {
+      // Check Firebase auth state
+      const user = firebaseService.getCurrentUser();
+      if (user) {
+        const profile = firebaseService.getUserProfile(user.uid);
+        if (profile) {
+          // Load user stats
+          const existingStats = localStorage.getItem(`smartgrow_stats_${profile.uid}`);
+          if (existingStats) {
+            const stats = JSON.parse(existingStats);
+            setUserStats(stats);
+            localStorage.setItem('smartgrow_user_stats', existingStats);
+          }
+          setIsAuthenticated(true);
+        }
+      }
+      
       // Simulate app initialization
       await new Promise(resolve => setTimeout(resolve, 1500));
       setIsLoading(false);
@@ -159,19 +177,34 @@ const App: React.FC = () => {
   };
 
   const handleAuthSuccess = () => {
-    localStorage.setItem('smartgrow_session', 'active');
     setIsAuthenticated(true);
-    const stats = storageService.getUserStats();
-    setUserStats(stats);
-    showToast('Login Successful!');
-    const name = formatName(stats.fullName || stats.username);
-    addAlert('Welcome aboard!', `Hey ${name}, we're ready to grow!`, 'info');
+    const user = firebaseService.getCurrentUser();
+    if (user) {
+      const profile = firebaseService.getUserProfile(user.uid);
+      if (profile) {
+        const stats = storageService.getUserStats();
+        setUserStats(stats);
+        showToast('Login Successful!');
+        const name = formatName(stats.fullName || stats.username);
+        addAlert('Welcome aboard!', `Hey ${name}, we're ready to grow!`, 'info');
+      }
+    }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('smartgrow_session');
-    setIsAuthenticated(false);
-    setCurrentPage('dashboard');
+  const handleLogout = async () => {
+    try {
+      await firebaseService.signOut();
+      setIsAuthenticated(false);
+      setCurrentPage('dashboard');
+      // Clear current user session
+      localStorage.removeItem('smartgrow_current_user');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still logout locally even if Firebase fails
+      setIsAuthenticated(false);
+      setCurrentPage('dashboard');
+      localStorage.removeItem('smartgrow_current_user');
+    }
   };
 
   const handleSaveDiagnosis = (result: DiagnosisResult, startMonitoring: boolean) => {
@@ -270,15 +303,25 @@ const App: React.FC = () => {
   };
 
   const handleDeleteScan = (id: string) => {
-    storageService.deleteScan(id);
-    setScans(storageService.getScans());
-    showToast('Deleted Forever');
+    const scan = scans.find(s => s.id === id);
+    const scanName = scan?.plantName || 'this scan';
+    
+    if (confirm(`Delete "${scanName}" from history?`)) {
+      storageService.deleteScan(id);
+      setScans(storageService.getScans());
+      showToast('Deleted from history');
+    }
   };
 
   const handleDeleteSession = (id: string) => {
-    storageService.deleteSession(id);
-    setSessions(storageService.getMonitoring());
-    showToast('Session Deleted');
+    const session = sessions.find(s => s.id === id);
+    const sessionName = session?.plantName || `Session ${id.slice(0, 8)}`;
+    
+    if (confirm(`Delete "${sessionName}" monitoring session?`)) {
+      storageService.deleteSession(id);
+      setSessions(storageService.getMonitoring());
+      showToast('Session deleted');
+    }
   };
 
   const NotificationPanel = () => {
@@ -354,14 +397,14 @@ const App: React.FC = () => {
 
   // Show loading screen initially
   if (isLoading) {
-    return <LoadingScreen message="Initializing SmartGrow AI..." />;
+    return <LoadingScreen message="Authenticating with SmartGrow AI..." />;
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 pb-32 md:pb-0 md:pl-64 safe-area-inset-top safe-area-inset-bottom pwa-full-height">
-      <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-primary-900 text-white p-6 shadow-2xl z-50 transition-colors duration-500">
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-[var(--primary-900)] text-white p-6 shadow-2xl z-50 transition-colors duration-500">
         <div className="flex items-center gap-3 mb-10">
-          <div className="bg-primary-500 p-2 rounded-xl">
+          <div className="bg-[var(--primary-500)] p-2 rounded-xl">
             <Leaf className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl font-black tracking-tight">SmartGrow AI</h1>
@@ -375,7 +418,7 @@ const App: React.FC = () => {
               className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
                 currentPage === item.id 
                   ? 'bg-white/10 text-white font-bold' 
-                  : 'text-primary-200/60 hover:text-white hover:bg-white/5'
+                  : 'text-slate-800 hover:text-white hover:bg-white/5'
               }`}
             >
               <item.icon className="w-5 h-5" />
@@ -384,14 +427,14 @@ const App: React.FC = () => {
           ))}
         </nav>
 
-        <div className="mt-auto pt-6 border-t border-primary-800">
+        <div className="mt-auto pt-6 border-t border-[var(--primary-800)]">
           <button 
             onClick={() => {
                 const newLang = language === 'en' ? 'tl' : 'en';
                 setLanguage(newLang);
                 handleUpdateStats({...userStats, lastAction: `Changed language to ${newLang === 'en' ? 'English' : 'Tagalog'}`});
             }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 text-primary-100 transition-all text-sm font-bold"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 text-[var(--primary-100)] transition-all text-sm font-bold"
           >
             <Languages className="w-4 h-4" />
             <span>{TRANSLATIONS[language].languageToggle}</span>
@@ -463,13 +506,13 @@ const App: React.FC = () => {
               {scans.filter(s => !s.archived).map(scan => (
                 <div 
                   key={scan.id} 
-                  className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center gap-6 hover:border-primary-200 transition-all shadow-sm hover:shadow-md group"
+                  className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center gap-6 hover:border-[var(--primary-200)] transition-all shadow-sm hover:shadow-md group"
                 >
                   <button 
                     onClick={() => setActiveDiagnosis(scan)}
                     className="flex-1 flex items-center gap-6 text-left"
                   >
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${scan.severity === 'Healthy' ? 'bg-primary-50 text-primary-600' : 'bg-red-50 text-red-600'}`}>
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${scan.severity === 'Healthy' ? 'bg-[var(--primary-50)] text-[var(--primary-600)]' : 'bg-red-50 text-red-600'}`}>
                       <Leaf className="w-8 h-8" />
                     </div>
                     <div className="flex-1">
@@ -532,25 +575,25 @@ const App: React.FC = () => {
         }} />}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-slate-200 px-2 pt-4 pb-6 flex justify-around items-center z-[60] h-20">
-        <button onClick={() => setCurrentPage('dashboard')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'dashboard' ? 'text-primary-600' : 'text-slate-400'}`}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 pt-4 pb-6 flex justify-around items-center z-[60] h-20 safe-area-inset-bottom">
+        <button onClick={() => setCurrentPage('dashboard')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'dashboard' ? 'text-[var(--primary-600)]' : 'text-slate-800'}`}>
           <LayoutDashboard className="w-5 h-5" />
           <span className="text-[9px] uppercase font-black">Home</span>
         </button>
-        <button onClick={() => setCurrentPage('monitoring')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'monitoring' ? 'text-primary-600' : 'text-slate-400'}`}>
+        <button onClick={() => setCurrentPage('monitoring')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'monitoring' ? 'text-[var(--primary-600)]' : 'text-slate-800'}`}>
           <Leaf className="w-5 h-5" />
           <span className="text-[9px] uppercase font-black">Track</span>
         </button>
         <div className="w-14 relative flex justify-center flex-1">
-          <button onClick={() => setCurrentPage('scanner')} className="absolute -top-12 bg-primary-600 text-white p-3 rounded-full shadow-2xl border-2 border-primary-900 z-[70] transition-colors duration-500">
+          <button onClick={() => setCurrentPage('scanner')} className="absolute -top-12 bg-[var(--primary-600)] text-white p-3 rounded-full shadow-2xl border-2 border-[var(--primary-900)] z-[70] transition-colors duration-500">
             <Scan className="w-5 h-5" />
           </button>
         </div>
-        <button onClick={() => setCurrentPage('history')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'history' ? 'text-primary-600' : 'text-slate-400'}`}>
+        <button onClick={() => setCurrentPage('history')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'history' ? 'text-[var(--primary-600)]' : 'text-slate-800'}`}>
           <History className="w-5 h-5" />
           <span className="text-[9px] uppercase font-black">History</span>
         </button>
-        <button onClick={() => setCurrentPage('profile')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'profile' ? 'text-primary-600' : 'text-slate-400'}`}>
+        <button onClick={() => setCurrentPage('profile')} className={`flex flex-col items-center gap-1 flex-1 ${currentPage === 'profile' ? 'text-[var(--primary-600)]' : 'text-slate-800'}`}>
           <SettingsIcon className="w-5 h-5" />
           <span className="text-[9px] uppercase font-black">Settings</span>
         </button>

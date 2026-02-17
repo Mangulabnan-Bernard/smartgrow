@@ -37,7 +37,7 @@ const Monitoring: React.FC<MonitoringProps> = ({ sessions, lang, onScanForDay, o
           <div key={session.id} className="bg-white p-5 md:p-7 rounded-[2rem] shadow-sm border border-slate-100 transition-colors duration-500">
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center shadow-inner transition-colors duration-500">
+                <div className="w-12 h-12 bg-[var(--primary-50)] text-[var(--primary-600)] rounded-2xl flex items-center justify-center shadow-inner transition-colors duration-500">
                   <Leaf className="w-6 h-6" />
                 </div>
                 <div>
@@ -62,7 +62,7 @@ const Monitoring: React.FC<MonitoringProps> = ({ sessions, lang, onScanForDay, o
               </div>
               <div className="h-2 bg-slate-100 rounded-full overflow-hidden flex">
                 <div 
-                  className="h-full bg-primary-500 transition-all duration-1000 shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]" 
+                  className="h-full bg-[var(--primary-500)] transition-all duration-1000 shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]" 
                   style={{ width: `${(session.currentDay / 7) * 100}%` }}
                 ></div>
               </div>
@@ -82,8 +82,8 @@ const Monitoring: React.FC<MonitoringProps> = ({ sessions, lang, onScanForDay, o
                     disabled={isLocked}
                     onClick={() => isCurrent && onScanForDay(session.id, day)}
                     className={`h-11 md:h-14 rounded-xl flex flex-col items-center justify-center transition-all ${
-                      isCurrent ? 'bg-primary-600 text-white shadow-lg ring-2 ring-primary-100 scale-105 z-10' :
-                      isPast ? 'bg-primary-50 text-primary-600 border border-primary-100' :
+                      isCurrent ? 'bg-[var(--primary-600)] text-white shadow-lg ring-2 ring-[var(--primary-100)] scale-105 z-10' :
+                      isPast ? 'bg-[var(--primary-50)] text-[var(--primary-600)] border border-[var(--primary-100)]' :
                       'bg-slate-50 text-slate-300 border border-slate-100 opacity-50'
                     }`}
                   >

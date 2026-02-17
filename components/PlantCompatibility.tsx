@@ -39,7 +39,7 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
             placeholder={t.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white border border-slate-100 rounded-2xl focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all shadow-sm font-medium"
+            className="w-full pl-12 pr-4 py-4 bg-white border border-slate-100 rounded-2xl focus:ring-2 focus:ring-[var(--primary-500)] focus:outline-none transition-all shadow-sm font-medium"
           />
         </div>
 
@@ -51,8 +51,8 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
                 onClick={() => setSelected(plant)}
                 className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all whitespace-nowrap active:scale-95 ${
                   selected.id === plant.id 
-                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-200' 
-                    : 'bg-white text-slate-500 border border-slate-100 hover:border-primary-200'
+                    ? 'bg-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-200)]' 
+                    : 'bg-white text-slate-500 border border-slate-100 hover:border-[var(--primary-200)]'
                 }`}
               >
                 {plant.name}
@@ -67,11 +67,11 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
       {/* Main Info Card */}
       <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-5">
-          <Dna className="w-32 h-32 text-primary-600" />
+          <Dna className="w-32 h-32 text-[var(--primary-600)]" />
         </div>
         
         <div className="flex items-center gap-5 mb-10 relative z-10">
-          <div className="w-20 h-20 bg-primary-100 text-primary-600 rounded-[2rem] flex items-center justify-center shadow-inner transition-colors duration-500">
+          <div className="w-20 h-20 bg-[var(--primary-100)] text-[var(--primary-600)] rounded-[2rem] flex items-center justify-center shadow-inner transition-colors duration-500">
             <Leaf className="w-10 h-10" />
           </div>
           <div>
@@ -80,7 +80,7 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
               <span className="px-3 py-1 bg-slate-900 text-white rounded-full text-[9px] font-black uppercase tracking-widest">
                 {selected.category}
               </span>
-              <span className="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-[9px] font-black uppercase tracking-widest border border-primary-100 transition-colors duration-500">
+              <span className="px-3 py-1 bg-[var(--primary-50)] text-[var(--primary-600)] rounded-full text-[9px] font-black uppercase tracking-widest border border-[var(--primary-100)] transition-colors duration-500">
                 Mix-able
               </span>
             </div>
@@ -90,9 +90,9 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
         <div className="grid md:grid-cols-2 gap-10">
           <div className="space-y-8">
             {/* Hybridization Section */}
-            <section className="bg-primary-50/50 p-6 rounded-3xl border border-primary-100 transition-colors duration-500">
-              <h4 className="flex items-center gap-3 text-primary-700 font-black text-sm uppercase tracking-widest mb-4 transition-colors duration-500">
-                <div className="p-2 bg-primary-600 text-white rounded-lg transition-colors duration-500"><Dna className="w-4 h-4" /></div>
+            <section className="bg-[var(--primary-50)]/50 p-6 rounded-3xl border border-[var(--primary-100)] transition-colors duration-500">
+              <h4 className="flex items-center gap-3 text-[var(--primary-700)] font-black text-sm uppercase tracking-widest mb-4 transition-colors duration-500">
+                <div className="p-2 bg-[var(--primary-600)] text-white rounded-lg transition-colors duration-500"><Dna className="w-4 h-4" /></div>
                 {t.mixTips}
               </h4>
               <p className="text-slate-700 text-xs leading-relaxed font-bold">
@@ -101,13 +101,13 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
             </section>
 
             <section>
-              <h4 className="flex items-center gap-3 text-primary-600 font-black text-sm uppercase tracking-widest mb-5 transition-colors duration-500">
-                <div className="p-2 bg-primary-100 rounded-lg transition-colors duration-500"><Check className="w-4 h-4" /></div>
+              <h4 className="flex items-center gap-3 text-[var(--primary-600)] font-black text-sm uppercase tracking-widest mb-5 transition-colors duration-500">
+                <div className="p-2 bg-[var(--primary-100)] rounded-lg transition-colors duration-500"><Check className="w-4 h-4" /></div>
                 {t.companionPlants}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {selected.companions.map(comp => (
-                  <span key={comp} className="px-5 py-2.5 bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-100 hover:bg-primary-50 hover:border-primary-200 transition-all">
+                  <span key={comp} className="px-5 py-2.5 bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-100 hover:bg-[var(--primary-50)] hover:border-[var(--primary-200)] transition-all">
                     {comp}
                   </span>
                 ))}
@@ -144,11 +144,11 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
       </div>
 
       {/* Breeder's Guide Intro */}
-      <div className="bg-primary-600 p-8 rounded-[2.5rem] text-white shadow-lg shadow-primary-200/50 transition-colors duration-500">
+      <div className="bg-[var(--primary-600)] p-8 rounded-[2.5rem] text-white shadow-lg shadow-[var(--primary-200)]/50 transition-colors duration-500">
         <div className="flex items-start gap-5">
           <div>
             <h4 className="font-black text-lg uppercase tracking-wider mb-2">{t.breedingGuideTitle}</h4>
-            <p className="text-sm text-primary-50 leading-relaxed font-medium">
+            <p className="text-sm text-[var(--primary-50)] leading-relaxed font-medium">
               {t.breedingGuideDesc}
             </p>
           </div>

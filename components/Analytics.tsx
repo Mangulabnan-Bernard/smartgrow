@@ -56,7 +56,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ scans, sessions, onBack }) => {
         {/* Severity Distribution */}
         <div className="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-100">
           <h3 className="font-black text-slate-800 mb-6 flex items-center gap-3">
-            <PieIcon className="w-5 h-5 text-primary-500 transition-colors duration-500" />
+            <PieIcon className="w-5 h-5 text-[var(--primary-500)] transition-colors duration-500" />
             Health Distribution
           </h3>
           <div className="h-64" style={{ height: '256px' }}>
@@ -97,7 +97,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ scans, sessions, onBack }) => {
         {/* Scan Frequency */}
         <div className="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-100">
           <h3 className="font-black text-slate-800 mb-6 flex items-center gap-3">
-            <TrendingUp className="w-5 h-5 text-primary-500 transition-colors duration-500" />
+            <TrendingUp className="w-5 h-5 text-[var(--primary-500)] transition-colors duration-500" />
             7-Day Activity Trend
           </h3>
           <div className="h-64" style={{ height: '256px' }}>
@@ -123,7 +123,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ scans, sessions, onBack }) => {
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-7 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-          <div className="w-14 h-14 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center transition-colors duration-500 shadow-inner">
+          <div className="w-14 h-14 bg-[var(--primary-50)] text-[var(--primary-600)] rounded-2xl flex items-center justify-center transition-colors duration-500 shadow-inner">
             <Calendar className="w-7 h-7" />
           </div>
           <div>
@@ -133,7 +133,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ scans, sessions, onBack }) => {
         </div>
         
         <div className="bg-white p-7 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-          <div className="w-14 h-14 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center transition-colors duration-500 shadow-inner">
+          <div className="w-14 h-14 bg-[var(--primary-50)] text-[var(--primary-600)] rounded-2xl flex items-center justify-center transition-colors duration-500 shadow-inner">
             <Activity className="w-7 h-7" />
           </div>
           <div>

@@ -143,7 +143,7 @@ const Scanner: React.FC<ScannerProps> = ({ lang, onResult, onBack }) => {
           <X className="w-6 h-6" />
         </button>
         <div className="flex flex-col items-center">
-            <h2 className="text-sm font-black uppercase tracking-widest text-primary-400">Smart Scanner</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-[var(--primary-400)]">Smart Scanner</h2>
             <p className="text-[10px] text-white/60 font-medium">Point at plant leaves</p>
         </div>
         <button 
@@ -168,16 +168,16 @@ const Scanner: React.FC<ScannerProps> = ({ lang, onResult, onBack }) => {
         )}
 
         {isAnalyzing && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-primary-950/80 backdrop-blur-lg z-20 p-10 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--primary-950)]/80 backdrop-blur-lg z-20 p-10 text-center">
             <div className="relative mb-8">
-              <div className="w-24 h-24 border-4 border-primary-500/30 rounded-full animate-ping absolute inset-0"></div>
-              <div className="w-24 h-24 bg-primary-500 rounded-full flex items-center justify-center relative">
+              <div className="w-24 h-24 border-4 border-[var(--primary-500)]/30 rounded-full animate-ping absolute inset-0"></div>
+              <div className="w-24 h-24 bg-[var(--primary-500)] rounded-full flex items-center justify-center relative">
                 <Leaf className="w-10 h-10 text-white animate-pulse" />
               </div>
             </div>
             <h3 className="text-2xl font-black mb-2">Analyzing Sample...</h3>
-            <p className="text-primary-300/60 text-sm font-medium max-w-xs">
-              Gemini Vision is identifying species and health markers.
+            <p className="text-[var(--primary-300)]/60 text-sm font-medium max-w-xs">
+               identifying species and health markers.
             </p>
           </div>
         )}
@@ -202,14 +202,14 @@ const Scanner: React.FC<ScannerProps> = ({ lang, onResult, onBack }) => {
         {!isAnalyzing && !error && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-16">
             <div className="w-full aspect-square max-w-xs border-2 border-white/20 rounded-[2.5rem] relative overflow-hidden">
-              <div className="absolute inset-0 border-[1.5px] border-primary-400/30 rounded-[2.5rem] animate-pulse"></div>
+              <div className="absolute inset-0 border-[1.5px] border-[var(--primary-400)]/30 rounded-[2.5rem] animate-pulse"></div>
               {/* Corner Accents */}
-              <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-primary-500 rounded-tl-[1.5rem]"></div>
-              <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-primary-500 rounded-tr-[1.5rem]"></div>
-              <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-primary-500 rounded-bl-[1.5rem]"></div>
-              <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-primary-500 rounded-br-[1.5rem]"></div>
+              <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-[var(--primary-500)] rounded-tl-[1.5rem]"></div>
+              <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-[var(--primary-500)] rounded-tr-[1.5rem]"></div>
+              <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-[var(--primary-500)] rounded-bl-[1.5rem]"></div>
+              <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-[var(--primary-500)] rounded-br-[1.5rem]"></div>
               
-              <div className="absolute top-0 left-0 right-0 h-1 bg-primary-500/50 shadow-[0_0_15px_rgba(var(--primary-rgb),0.8)] animate-scan"></div>
+              <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--primary-500)]/50 shadow-[0_0_15px_rgba(var(--primary-rgb),0.8)] animate-scan"></div>
             </div>
           </div>
         )}

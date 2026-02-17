@@ -4,23 +4,22 @@ interface LoadingScreenProps {
   message?: string;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Loading SmartGrow AI..." }) => {
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Authenticating with SmartGrow AI..." }) => {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center z-50 safe-area-inset-top safe-area-inset-bottom pwa-full-height">
       <div className="text-center">
-        {/* Animated plant icon */}
+        {/* Animated plant icon using CSS only */}
         <div className="mb-6">
           <div className="relative w-16 h-16 mx-auto">
             <div className="absolute inset-0 bg-green-500 rounded-full animate-pulse"></div>
             <div className="absolute inset-2 bg-green-600 rounded-full animate-ping"></div>
             <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center">
-              <svg 
-                className="w-6 h-6 text-green-600" 
-                fill="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41 1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
+              {/* Plant symbol using CSS */}
+              <div className="w-8 h-8 bg-green-500 rounded-t-full relative">
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-6 h-6 bg-green-600 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-green-400 rounded-full"></div>
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-green-300 rounded-full"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -42,6 +41,11 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Loading SmartG
           <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full animate-pulse" style={{ width: '60%' }}></div>
           </div>
+        </div>
+        
+        {/* Firebase connection status */}
+        <div className="mt-6 text-sm text-gray-600">
+          <div className="animate-pulse">🔐 Securing connection...</div>
         </div>
       </div>
       
