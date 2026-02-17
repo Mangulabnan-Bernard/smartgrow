@@ -358,7 +358,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 pb-32 md:pb-0 md:pl-64">
+    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 pb-32 md:pb-0 md:pl-64 safe-area-inset-top safe-area-inset-bottom pwa-full-height">
       <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-primary-900 text-white p-6 shadow-2xl z-50 transition-colors duration-500">
         <div className="flex items-center gap-3 mb-10">
           <div className="bg-primary-500 p-2 rounded-xl">

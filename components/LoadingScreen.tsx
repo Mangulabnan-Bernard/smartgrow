@@ -6,7 +6,7 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Loading SmartGrow AI..." }) => {
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center z-50 safe-area-inset-top safe-area-inset-bottom pwa-full-height">
       <div className="text-center">
         {/* Animated plant icon */}
         <div className="mb-6">
