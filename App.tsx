@@ -31,6 +31,7 @@ import PlantCompatibility from './components/PlantCompatibility';
 import Analytics from './components/Analytics';
 import AuthModal from './components/AuthModal';
 import Archived from './components/Archived';
+import LoadingScreen from './components/LoadingScreen';
 import { storageService } from './services/storageService';
 import { DiagnosisResult, MonitoringSession, AppAlert, UserStats, Language, EnvironmentalData, Page } from './types';
 import { TRANSLATIONS, THEME_CONFIGS } from './constants';
@@ -54,6 +55,7 @@ const App: React.FC = () => {
   const [monitoringCtx, setMonitoringCtx] = useState<MonitoringContext | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [envData, setEnvData] = useState<EnvironmentalData>({
     temperature: 28.4,
@@ -78,6 +80,17 @@ const App: React.FC = () => {
     if (!name) return '';
     return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
+
+  // Initialize app and hide loading screen
+  useEffect(() => {
+    const initializeApp = async () => {
+      // Simulate app initialization
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsLoading(false);
+    };
+    
+    initializeApp();
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -338,6 +351,11 @@ const App: React.FC = () => {
     { id: 'history', icon: History, label: TRANSLATIONS[language].history },
     { id: 'profile', icon: SettingsIcon, label: TRANSLATIONS[language].settings },
   ];
+
+  // Show loading screen initially
+  if (isLoading) {
+    return <LoadingScreen message="Initializing SmartGrow AI..." />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 pb-32 md:pb-0 md:pl-64">
