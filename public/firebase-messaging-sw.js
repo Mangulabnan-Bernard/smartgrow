@@ -18,11 +18,12 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message', payload);
   
-  const notificationTitle = payload.notification?.title || 'SmartGrow Alert';
+  const notificationTitle = payload.notification?.title || 'SmartGrow AI';
   const notificationOptions = {
     body: payload.notification?.body,
     icon: '/icon-192x192.png',
     badge: '/icon-192x192.png',
+    tag: 'smartgrow-notification',
     data: payload.data || {},
     vibrate: [200, 100, 200],
     requireInteraction: true

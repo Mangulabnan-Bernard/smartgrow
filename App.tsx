@@ -106,7 +106,7 @@ const App: React.FC = () => {
           console.log('Push message received:', payload);
           // Show in-app notification for foreground messages
           addAlert(
-            payload.notification?.title || 'SmartGrow Alert', 
+            payload.notification?.title || 'SmartGrow AI Alert', 
             payload.notification?.body || 'You have a new notification', 
             'info'
           );
@@ -325,7 +325,7 @@ const App: React.FC = () => {
   };
 
   const NotificationPanel = () => {
-    const visibleAlerts = alerts.slice(0, 6);
+    const visibleAlerts = alerts.slice(0, 8);
     return (
       <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsNotificationOpen(false)}></div>
@@ -462,13 +462,13 @@ const App: React.FC = () => {
             onResult={(res) => { 
               // Add alert for new plant analysis
               if (res.severity === 'Severe') {
-                addAlert('🚨 Critical Alert!', `${res.plantName} needs immediate attention! ${res.diagnosis}`, 'error');
+                addAlert('🚨 SmartGrow AI Alert!', `${res.plantName} needs immediate attention! ${res.diagnosis}`, 'error');
               } else if (res.severity === 'Moderate') {
-                addAlert('⚠️ Plant Warning', `${res.plantName} shows moderate symptoms: ${res.diagnosis}`, 'warning');
+                addAlert('⚠️ SmartGrow AI Warning', `${res.plantName} shows moderate symptoms: ${res.diagnosis}`, 'warning');
               } else if (res.severity === 'Mild') {
-                addAlert('🌱 Plant Check', `${res.plantName} has mild symptoms: ${res.diagnosis}`, 'info');
+                addAlert('🌱 SmartGrow AI Check', `${res.plantName} has mild symptoms: ${res.diagnosis}`, 'info');
               } else if (res.severity === 'Healthy') {
-                addAlert('✅ Healthy Plant!', `${res.plantName} is in great condition!`, 'info');
+                addAlert('✅ SmartGrow AI Healthy!', `${res.plantName} is in great condition!`, 'info');
               }
               
               setActiveDiagnosis({ ...res, environment: { ...envData } } as DiagnosisResult); 
@@ -516,7 +516,7 @@ const App: React.FC = () => {
                     {alerts.length > 0 && <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></div>}
                  </button>
             </div>
-            <div className="grid gap-6">
+            <div className="space-y-4 max-h-96 overflow-y-auto">
               {scans.filter(s => !s.archived).map(scan => (
                 <div 
                   key={scan.id} 
