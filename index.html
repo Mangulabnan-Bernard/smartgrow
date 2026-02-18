@@ -12,7 +12,7 @@
     <meta name="msapplication-TileColor" content="#22c55e">
     <meta name="msapplication-navbutton-color" content="#22c55e">
     <meta name="apple-mobile-web-app-status-bar-style" content="#22c55e">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SmartGrow AI">
     <meta name="application-name" content="SmartGrow AI">
@@ -39,7 +39,13 @@
       document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', color);
       
       // Apply theme class to body
-      document.body.classList.add(`theme-${themeColor}`);
+      if (document.body) {
+        document.body.classList.add(`theme-${themeColor}`);
+      } else {
+        document.addEventListener('DOMContentLoaded', () => {
+          document.body.classList.add(`theme-${themeColor}`);
+        });
+      }
     </script>
     
     <!-- PWA Manifest -->
