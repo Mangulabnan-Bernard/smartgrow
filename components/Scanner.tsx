@@ -57,14 +57,14 @@ const Scanner: React.FC<ScannerProps> = ({ lang, onResult, onBack }) => {
       }
     }
 
-    // If all attempts failed, show user-friendly message
+    // If all attempts failed
     console.error('All camera constraint attempts failed:', lastError);
     if (lastError instanceof DOMException && lastError.name === 'NotAllowedError') {
-      setError('📷 Camera access needed. Please allow camera access to scan plants.');
+      setError('Camera access denied. Please grant permission in your browser settings.');
     } else if (lastError instanceof DOMException && lastError.name === 'NotReadableError') {
-      setError('📷 Camera is busy. Please close other apps using the camera.');
+      setError('Camera is in use by another application or tab. Please close other apps and try again.');
     } else {
-      setError('📷 Unable to access camera. Please check your device settings.');
+      setError('Could not start video source. Your device may not support camera access or the browser blocked it.');
     }
   }, [facingMode, stopCamera]);
 
@@ -183,25 +183,33 @@ const Scanner: React.FC<ScannerProps> = ({ lang, onResult, onBack }) => {
         )}
 
         {error && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
-            <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 text-center">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <RefreshCcw className="w-8 h-8 text-orange-500" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Camera Access</h3>
-              <p className="text-slate-600 mb-6">{error}</p>
-              <button 
+          <div className="p-10 text-center max-w-md z-30">
+            <div className="bg-red-500/10 text-red-500 p-6 rounded-[2.5rem] border border-red-500/20 mb-8">
+              <RefreshCcw className="w-10 h-10 mx-auto mb-4 opacity-50" />
+              <p className="font-bold text-lg mb-2">Hardware Access Issue</p>
+              <p className="text-sm opacity-80">{error}</p>
+            </div>
+            <button 
                 onClick={() => { setError(null); startCamera(); }} 
-                className="bg-[var(--primary-600)] text-white px-8 py-3 rounded-2xl font-bold hover:bg-[var(--primary-700)] transition-colors w-full"
-              >
-                Try Again
-              </button>
-              <button 
-                onClick={() => fileInputRef.current?.click()} 
-                className="mt-3 text-[var(--primary-600)] font-medium hover:text-[var(--primary-700)] transition-colors"
-              >
-                Or Upload Photo Instead
-              </button>
+                className="bg-white text-slate-900 px-10 py-4 rounded-2xl font-black shadow-xl hover:bg-slate-100 transition-colors"
+            >
+              Retry Connection
+            </button>
+          </div>
+        )}
+
+        {/* Framing Overlay */}
+        {!isAnalyzing && !error && (
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-16">
+            <div className="w-full aspect-square max-w-xs border-2 border-white/20 rounded-[2.5rem] relative overflow-hidden">
+              <div className="absolute inset-0 border-[1.5px] border-[var(--primary-400)]/30 rounded-[2.5rem] animate-pulse"></div>
+              {/* Corner Accents */}
+              <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-[var(--primary-500)] rounded-tl-[1.5rem]"></div>
+              <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-[var(--primary-500)] rounded-tr-[1.5rem]"></div>
+              <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-[var(--primary-500)] rounded-bl-[1.5rem]"></div>
+              <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-[var(--primary-500)] rounded-br-[1.5rem]"></div>
+              
+              <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--primary-500)]/50 shadow-[0_0_15px_rgba(var(--primary-rgb),0.8)] animate-scan"></div>
             </div>
           </div>
         )}

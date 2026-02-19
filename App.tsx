@@ -33,7 +33,7 @@ import AuthModal from './components/AuthModal';
 import Archived from './components/Archived';
 import LoadingScreen from './components/LoadingScreen';
 import { storageService } from './services/storageService';
-import { requestNotificationPermission, onMessageListener } from './services/firebase';
+import { firebaseService } from './services/firebaseService';
 import { DiagnosisResult, MonitoringSession, AppAlert, UserStats, Language, EnvironmentalData, Page } from './types';
 import { TRANSLATIONS, THEME_CONFIGS } from './constants';
 
@@ -51,7 +51,7 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('en');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     // Check if Firebase user is authenticated
-    return false; // Will be updated by auth state listener
+    return firebaseService.isAuthenticated();
   });
   const [activeDiagnosis, setActiveDiagnosis] = useState<DiagnosisResult | null>(null);
   const [monitoringCtx, setMonitoringCtx] = useState<MonitoringContext | null>(null);
@@ -86,32 +86,21 @@ const App: React.FC = () => {
   // Initialize app and check Firebase auth state
   useEffect(() => {
     const initializeApp = async () => {
-      // Initialize Firebase Analytics
-      if (typeof window !== 'undefined') {
-        const { getAnalytics } = await import('firebase/analytics');
-        const analytics = getAnalytics();
-        console.log('Firebase Analytics initialized');
+      // Check Firebase auth state
+      const user = firebaseService.getCurrentUser();
+      if (user) {
+        const profile = firebaseService.getUserProfile(user.uid);
+        if (profile) {
+          // Load user stats
+          const existingStats = localStorage.getItem(`smartgrow_stats_${profile.uid}`);
+          if (existingStats) {
+            const stats = JSON.parse(existingStats);
+            setUserStats(stats);
+            localStorage.setItem('smartgrow_user_stats', existingStats);
+          }
+          setIsAuthenticated(true);
+        }
       }
-      
-      // Request notification permission
-      requestNotificationPermission().then(result => {
-        if (result) {
-          console.log('FCM Token obtained:', result);
-        }
-      });
-      
-      // Set up push message listener
-      onMessageListener().then(payload => {
-        if (payload) {
-          console.log('Push message received:', payload);
-          // Show in-app notification for foreground messages
-          addAlert(
-            payload.notification?.title || 'SmartGrow AI Alert', 
-            payload.notification?.body || 'You have a new notification', 
-            'info'
-          );
-        }
-      });
       
       // Simulate app initialization
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -189,21 +178,32 @@ const App: React.FC = () => {
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
-    showToast('Login Successful!');
-    addAlert('Welcome aboard!', `Hey User, we're ready to grow!`, 'info');
+    const user = firebaseService.getCurrentUser();
+    if (user) {
+      const profile = firebaseService.getUserProfile(user.uid);
+      if (profile) {
+        const stats = storageService.getUserStats();
+        setUserStats(stats);
+        showToast('Login Successful!');
+        const name = formatName(stats.fullName || stats.username);
+        addAlert('Welcome aboard!', `Hey ${name}, we're ready to grow!`, 'info');
+      }
+    }
   };
 
   const handleLogout = async () => {
     try {
-      // Add logout logic here if needed
+      await firebaseService.signOut();
       setIsAuthenticated(false);
       setCurrentPage('dashboard');
-      showToast('Logged out successfully');
+      // Clear current user session
+      localStorage.removeItem('smartgrow_current_user');
     } catch (error) {
       console.error('Logout error:', error);
       // Still logout locally even if Firebase fails
       setIsAuthenticated(false);
       setCurrentPage('dashboard');
+      localStorage.removeItem('smartgrow_current_user');
     }
   };
 
@@ -325,7 +325,7 @@ const App: React.FC = () => {
   };
 
   const NotificationPanel = () => {
-    const visibleAlerts = alerts.slice(0, 8);
+    const visibleAlerts = alerts.slice(0, 6);
     return (
       <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsNotificationOpen(false)}></div>
@@ -459,21 +459,7 @@ const App: React.FC = () => {
         {currentPage === 'scanner' && (
           <Scanner 
             lang={language}
-            onResult={(res) => { 
-              // Add alert for new plant analysis
-              if (res.severity === 'Severe') {
-                addAlert('🚨 SmartGrow AI Alert!', `${res.plantName} needs immediate attention! ${res.diagnosis}`, 'error');
-              } else if (res.severity === 'Moderate') {
-                addAlert('⚠️ SmartGrow AI Warning', `${res.plantName} shows moderate symptoms: ${res.diagnosis}`, 'warning');
-              } else if (res.severity === 'Mild') {
-                addAlert('🌱 SmartGrow AI Check', `${res.plantName} has mild symptoms: ${res.diagnosis}`, 'info');
-              } else if (res.severity === 'Healthy') {
-                addAlert('✅ SmartGrow AI Healthy!', `${res.plantName} is in great condition!`, 'info');
-              }
-              
-              setActiveDiagnosis({ ...res, environment: { ...envData } } as DiagnosisResult); 
-              setCurrentPage('dashboard'); 
-            }}
+            onResult={(res) => { setActiveDiagnosis({ ...res, environment: { ...envData } } as DiagnosisResult); setCurrentPage('dashboard'); }}
             onBack={() => setCurrentPage('dashboard')}
           />
         )}
@@ -516,7 +502,7 @@ const App: React.FC = () => {
                     {alerts.length > 0 && <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></div>}
                  </button>
             </div>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="grid gap-6">
               {scans.filter(s => !s.archived).map(scan => (
                 <div 
                   key={scan.id} 
