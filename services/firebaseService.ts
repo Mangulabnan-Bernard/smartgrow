@@ -127,6 +127,7 @@ class FirebaseService {
     const errorMap: Record<string, string> = {
       'auth/email-already-in-use': 'An account with this email already exists.',
       'auth/invalid-email': 'Invalid email address.',
+      'auth/invalid-credential': 'Invalid email or password.',
       'auth/operation-not-allowed': 'Email/password accounts are not enabled.',
       'auth/weak-password': 'Password should be at least 6 characters.',
       'auth/user-not-found': 'No account found with this email.',
