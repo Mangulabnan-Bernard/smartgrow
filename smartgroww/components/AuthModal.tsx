@@ -237,14 +237,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, lang }) => {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-green-600 text-white font-black text-base rounded-2xl shadow-lg shadow-green-100 hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-2 mt-8 disabled:opacity-50 disabled:cursor-not-allowed animate-in fade-in slide-in-from-bottom-5 duration-500 stagger-5"
+              className="w-full py-4 bg-green-600 text-white font-black text-lg rounded-2xl shadow-xl shadow-green-100 hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-3 mt-8 disabled:opacity-50 disabled:cursor-not-allowed animate-in fade-in slide-in-from-bottom-5 duration-500 stagger-5"
             >
               {loading ? (
-                <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
                   {isLogin ? 'Sign In' : 'Create Account'}
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-5 h-5" />
                 </>
               )}
             </button>

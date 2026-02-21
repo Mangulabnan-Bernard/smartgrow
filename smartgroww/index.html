@@ -33,24 +33,19 @@
       const color = themeColors[themeColor] || themeColors.green;
       
       // Update meta tags
-      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeColorMeta) themeColorMeta.setAttribute('content', color);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
+      document.querySelector('meta[name="msapplication-TileColor"]').setAttribute('content', color);
+      document.querySelector('meta[name="msapplication-navbutton-color"]').setAttribute('content', color);
+      document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', color);
       
-      const msTileColorMeta = document.querySelector('meta[name="msapplication-TileColor"]');
-      if (msTileColorMeta) msTileColorMeta.setAttribute('content', color);
-      
-      const msNavColorMeta = document.querySelector('meta[name="msapplication-navbutton-color"]');
-      if (msNavColorMeta) msNavColorMeta.setAttribute('content', color);
-      
-      const appleStatusMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-      if (appleStatusMeta) appleStatusMeta.setAttribute('content', color);
-      
-      // Apply theme class to body (wait for DOM to be ready)
-      document.addEventListener('DOMContentLoaded', () => {
-        if (document.body) {
+      // Apply theme class to body
+      if (document.body) {
+        document.body.classList.add(`theme-${themeColor}`);
+      } else {
+        document.addEventListener('DOMContentLoaded', () => {
           document.body.classList.add(`theme-${themeColor}`);
-        }
-      });
+        });
+      }
     </script>
     
     <!-- PWA Manifest -->

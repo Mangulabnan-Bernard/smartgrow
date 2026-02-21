@@ -5,34 +5,13 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User,
-  setPersistence,
-  browserLocalPersistence
+  User
 } from 'firebase/auth';
-import { 
-  getFirestore,
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  query,
-  where,
-  orderBy,
-  limit,
-  getDocs
-} from 'firebase/firestore';
 import { firebaseConfig } from '../src/firebase';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Set auth persistence to survive browser restarts
-setPersistence(auth, browserLocalPersistence);
 
 export interface UserProfile {
   uid: string;
@@ -49,13 +28,11 @@ export interface AuthError {
 
 class FirebaseService {
   private currentUser: User | null = null;
-  private authInitialized: boolean = false;
 
   constructor() {
     // Listen to auth state changes
     onAuthStateChanged(auth, (user) => {
       this.currentUser = user;
-      this.authInitialized = true;
       if (user) {
         // Update last login time
         this.updateUserProfile(user.uid, { lastLoginAt: Date.now() });
@@ -150,7 +127,6 @@ class FirebaseService {
     const errorMap: Record<string, string> = {
       'auth/email-already-in-use': 'An account with this email already exists.',
       'auth/invalid-email': 'Invalid email address.',
-      'auth/invalid-credential': 'Invalid email or password.',
       'auth/operation-not-allowed': 'Email/password accounts are not enabled.',
       'auth/weak-password': 'Password should be at least 6 characters.',
       'auth/user-not-found': 'No account found with this email.',
@@ -168,78 +144,6 @@ class FirebaseService {
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return this.currentUser !== null;
-  }
-
-  // Check if auth is initialized
-  isAuthInitialized(): boolean {
-    return this.authInitialized;
-  }
-
-  // Wait for auth to be initialized
-  waitForAuthInit(): Promise<void> {
-    return new Promise((resolve) => {
-      if (this.authInitialized) {
-        resolve();
-      } else {
-        const checkInterval = setInterval(() => {
-          if (this.authInitialized) {
-            clearInterval(checkInterval);
-            resolve();
-          }
-        }, 100);
-      }
-    });
-  }
-
-  // Cloud storage methods
-  async saveUserData(uid: string, dataType: 'scans' | 'monitoring' | 'alerts' | 'stats', data: any): Promise<void> {
-    try {
-      const docRef = doc(db, 'users', uid, 'data', dataType);
-      await setDoc(docRef, { data, updatedAt: Date.now() }, { merge: true });
-    } catch (error) {
-      console.error('Error saving user data:', error);
-      throw error;
-    }
-  }
-
-  async getUserData(uid: string, dataType: 'scans' | 'monitoring' | 'alerts' | 'stats'): Promise<any> {
-    try {
-      const docRef = doc(db, 'users', uid, 'data', dataType);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        return docSnap.data().data;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error getting user data:', error);
-      return null;
-    }
-  }
-
-  async syncDataFromCloud(uid: string): Promise<{
-    scans?: any[];
-    monitoring?: any[];
-    alerts?: any[];
-    stats?: any;
-  }> {
-    try {
-      const [scans, monitoring, alerts, stats] = await Promise.all([
-        this.getUserData(uid, 'scans'),
-        this.getUserData(uid, 'monitoring'),
-        this.getUserData(uid, 'alerts'),
-        this.getUserData(uid, 'stats')
-      ]);
-
-      return {
-        scans: scans || [],
-        monitoring: monitoring || [],
-        alerts: alerts || [],
-        stats: stats || null
-      };
-    } catch (error) {
-      console.error('Error syncing data from cloud:', error);
-      return {};
-    }
   }
 }
 

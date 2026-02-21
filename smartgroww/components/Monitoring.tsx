@@ -8,29 +8,18 @@ interface MonitoringProps {
   sessions: MonitoringSession[];
   lang: Language;
   onScanForDay: (sessionId: string, day: number) => void;
-  onViewPastScan: (sessionId: string, day: number, record: any) => void;
   onArchiveSession: (id: string) => void;
-  onShowConfirmModal: (config: {
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    confirmText?: string;
-    type?: 'delete' | 'warning' | 'info';
-  }) => void;
 }
 
-const Monitoring: React.FC<MonitoringProps> = ({ sessions, lang, onScanForDay, onViewPastScan, onArchiveSession, onShowConfirmModal }) => {
+const Monitoring: React.FC<MonitoringProps> = ({ sessions, lang, onScanForDay, onArchiveSession }) => {
   const activeSessions = sessions.filter(s => s.status === 'Active');
   const t = TRANSLATIONS[lang];
 
   const handleArchiveWithConfirm = (id: string, name: string) => {
-    onShowConfirmModal({
-      title: 'Archive Session',
-      message: `Are you sure you want to stop tracking "${name}"? This will archive the recovery session.`,
-      confirmText: 'Archive',
-      type: 'warning',
-      onConfirm: () => onArchiveSession(id)
-    });
+      const confirmed = window.confirm(`Are you sure you want to stop tracking ${name}? This will archive the recovery session.`);
+      if (confirmed) {
+          onArchiveSession(id);
+      }
   };
 
   return (
@@ -86,25 +75,17 @@ const Monitoring: React.FC<MonitoringProps> = ({ sessions, lang, onScanForDay, o
                 const isLocked = day > session.currentDay;
                 const isCurrent = day === session.currentDay;
                 const isPast = day < session.currentDay;
-                const dayRecord = session.dailyRecords.find(r => r.day === day);
 
                 return (
                   <button
                     key={day}
                     disabled={isLocked}
-                    onClick={() => {
-                      if (isCurrent) {
-                        onScanForDay(session.id, day);
-                      } else if (isPast && dayRecord) {
-                        onViewPastScan(session.id, day, dayRecord);
-                      }
-                    }}
+                    onClick={() => isCurrent && onScanForDay(session.id, day)}
                     className={`h-11 md:h-14 rounded-xl flex flex-col items-center justify-center transition-all ${
                       isCurrent ? 'bg-[var(--primary-600)] text-white shadow-lg ring-2 ring-[var(--primary-100)] scale-105 z-10' :
-                      isPast ? 'bg-[var(--primary-50)] text-[var(--primary-600)] border border-[var(--primary-100)] hover:bg-[var(--primary-100)] cursor-pointer' :
+                      isPast ? 'bg-[var(--primary-50)] text-[var(--primary-600)] border border-[var(--primary-100)]' :
                       'bg-slate-50 text-slate-300 border border-slate-100 opacity-50'
                     }`}
-                    title={isPast && dayRecord ? `View Day ${day} scan` : isCurrent ? `Scan Day ${day}` : `Day ${day} not yet available`}
                   >
                     <span className="text-[8px] font-black uppercase">{day}</span>
                     {isPast ? <CheckCircle2 className="w-3.5 h-3.5 mt-0.5" /> : <Clock className="w-3.5 h-3.5 mt-0.5" />}

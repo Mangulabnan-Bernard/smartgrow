@@ -13,16 +13,7 @@ interface DiagnosisModalProps {
 
 const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, onSave }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'treatment' | 'prevention'>('overview');
-  const [isSaving, setIsSaving] = useState(false);
   const t = TRANSLATIONS[lang];
-
-  const handleSave = (monitor: boolean) => {
-    if (isSaving) return;
-    setIsSaving(true);
-    onSave(result, monitor);
-    // Reset saving state after a delay to prevent UI issues
-    setTimeout(() => setIsSaving(false), 1000);
-  };
 
   const severityColor = {
     Healthy: 'text-[var(--primary-600)] bg-[var(--primary-50)]',
@@ -190,19 +181,17 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
             <div className="p-8 border-t border-slate-100 bg-white flex-shrink-0">
               <div className="flex flex-col md:flex-row gap-3">
                 <button 
-                  onClick={() => handleSave(true)}
-                  disabled={isSaving}
-                  className="flex-1 bg-[var(--primary-600)] text-white px-6 py-3 rounded-2xl font-black text-base shadow-lg shadow-[var(--primary-200)] hover:bg-[var(--primary-700)] active:scale-95 transition-all flex items-center justify-center gap-2 duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => onSave(result, true)}
+                  className="flex-1 bg-[var(--primary-600)] text-white px-8 py-5 rounded-3xl font-black text-lg shadow-xl shadow-[var(--primary-200)] hover:bg-[var(--primary-700)] active:scale-95 transition-all flex items-center justify-center gap-3 duration-500"
                 >
-                  <Activity className="w-4 h-4" />
-                  {isSaving ? 'Saving...' : t.startMonitoring}
+                  <Activity className="w-6 h-6" />
+                  {t.startMonitoring}
                 </button>
                 <button 
-                  onClick={() => handleSave(false)}
-                  disabled={isSaving}
-                  className="px-6 py-3 bg-slate-100 text-slate-700 rounded-2xl font-bold hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => onSave(result, false)}
+                  className="px-8 py-5 bg-slate-100 text-slate-700 rounded-3xl font-bold hover:bg-slate-200 transition-colors"
                 >
-                  {isSaving ? 'Saving...' : t.save}
+                  {t.save}
                 </button>
               </div>
             </div>
@@ -224,7 +213,7 @@ const DiagnosisModal: React.FC<DiagnosisModalProps> = ({ result, lang, onClose, 
             </div>
             <button 
               onClick={onClose}
-              className="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-base shadow-lg hover:bg-slate-800 active:scale-95 transition-all"
+              className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black text-lg shadow-xl hover:bg-slate-800 active:scale-95 transition-all"
             >
               Exit
             </button>

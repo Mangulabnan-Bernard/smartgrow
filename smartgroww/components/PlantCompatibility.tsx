@@ -19,7 +19,7 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
   );
 
   return (
-    <div className="space-y-6 animate-in slide-in-from-right duration-300 pb-32 md:pb-6">
+    <div className="space-y-6 animate-in slide-in-from-right duration-300">
       <div className="flex items-center gap-4 mb-4">
         <button onClick={onBack} className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100 hover:bg-slate-50 transition-colors">
           <ChevronLeft className="w-6 h-6" />
@@ -95,15 +95,9 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
                 <div className="p-2 bg-[var(--primary-600)] text-white rounded-lg transition-colors duration-500"><Dna className="w-4 h-4" /></div>
                 {t.mixTips}
               </h4>
-              <p className="text-slate-700 text-xs leading-relaxed font-bold mb-3">
+              <p className="text-slate-700 text-xs leading-relaxed font-bold">
                 {selected.hybridInfo || "Standard growth rules. This plant does not mix easily with others."}
               </p>
-              <div className="bg-white/50 p-3 rounded-xl border border-[var(--primary-100)]">
-                <div className="flex items-center gap-2 text-[var(--primary-600)]">
-                  <Dna className="w-4 h-4" />
-                  <span className="text-xs font-bold uppercase">{t.crossPollinationInfo}</span>
-                </div>
-              </div>
             </section>
 
             <section>
@@ -150,82 +144,14 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
       </div>
 
       {/* Breeder's Guide Intro */}
-      <div className="bg-[var(--primary-600)] p-6 md:p-8 rounded-[2.5rem] text-white shadow-lg shadow-[var(--primary-200)]/50 transition-colors duration-500">
+      <div className="bg-[var(--primary-600)] p-8 rounded-[2.5rem] text-white shadow-lg shadow-[var(--primary-200)]/50 transition-colors duration-500">
         <div className="flex items-start gap-5">
-          <div className="flex-1">
+          <div>
             <h4 className="font-black text-lg uppercase tracking-wider mb-2">{t.breedingGuideTitle}</h4>
             <p className="text-sm text-[var(--primary-50)] leading-relaxed font-medium">
               {t.breedingGuideDesc}
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Breeder's Guide Content */}
-      <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-        <div className="space-y-8">
-          <section>
-            <h4 className="flex items-center gap-3 text-[var(--primary-600)] font-black text-sm uppercase tracking-widest mb-4">
-              <div className="p-2 bg-[var(--primary-100)] rounded-lg"><Beaker className="w-4 h-4" /></div>
-              {t.breedingTechniques}
-            </h4>
-            <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <h5 className="font-bold text-slate-800 mb-2">{t.crossPollination}</h5>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {t.crossPollinationDesc}
-                </p>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <h5 className="font-bold text-slate-800 mb-2">{t.selectionCriteria}</h5>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {t.selectionCriteriaDesc}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h4 className="flex items-center gap-3 text-[var(--primary-600)] font-black text-sm uppercase tracking-widest mb-4">
-              <div className="p-2 bg-[var(--primary-100)] rounded-lg"><Sparkles className="w-4 h-4" /></div>
-              {t.seedCollection}
-            </h4>
-            <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <h5 className="font-bold text-slate-800 mb-2">{t.harvesting}</h5>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {t.harvestingDesc}
-                </p>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <h5 className="font-bold text-slate-800 mb-2">{t.storageConditions}</h5>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {t.storageConditionsDesc}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h4 className="flex items-center gap-3 text-[var(--primary-600)] font-black text-sm uppercase tracking-widest mb-4">
-              <div className="p-2 bg-[var(--primary-100)] rounded-lg"><Info className="w-4 h-4" /></div>
-              {t.germinationTips}
-            </h4>
-            <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <h5 className="font-bold text-slate-800 mb-2">{t.preparation}</h5>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {t.preparationDesc}
-                </p>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <h5 className="font-bold text-slate-800 mb-2">{t.optimalConditions}</h5>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {t.optimalConditionsDesc}
-                </p>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
     </div>

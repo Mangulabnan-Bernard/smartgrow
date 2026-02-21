@@ -27,22 +27,14 @@ export const analyzePlant = async (imageB64: string, language: Language): Promis
     const model = 'gemini-3-flash-preview';
     
     const prompt = `
-      Act as an expert plant pathologist and horticultural specialist.
-      Analyze the provided image for plant health assessment.
-      
-      CRITICAL RULES:
-      1. If NO clear plant/leaf is visible: Set "isPlant": false, "plantName": "Unknown", "diagnosis": "No plant detected"
-      2. If image is blurry/unclear: Set "isPlant": false, "plantName": "Unknown", "diagnosis": "Image too unclear"
-      3. If healthy plant: Use clear, positive language like "Healthy and thriving" or "Excellent plant health"
-      4. NEVER use technical jargon like "n/a", "specimen", "post harvest" - use simple, user-friendly terms
-      5. Focus on actionable advice the user can understand immediately
-      
-      Analysis steps:
-      - Identify plant species if recognizable
-      - Check for pests, diseases, nutrient issues
-      - Assess overall health status
-      - Provide practical treatment options
-      
+      Act as a senior professional horticulturalist.
+      Analyze the provided image of a plant leaf/specimen.
+      1. Identify the plant species.
+      2. Detect symptoms of pests, fungi, nutrient deficiencies, or structural diseases.
+      3. If the image is NOT a plant, or is too blurry to identify any botanical features, set "isPlant" to false.
+      4. If perfectly healthy, clearly state "Healthy" in diagnosis and severity.
+      5. Provide actionable, science-based recovery steps.
+      6. Output in JSON format.
       Language requirement: ${language === 'tl' ? 'Tagalog' : 'English'}.
     `;
 
@@ -78,7 +70,7 @@ export const analyzePlant = async (imageB64: string, language: Language): Promis
     return { 
       result: {
         ...result,
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: Math.random().toString(36).substr(2, 9),
         timestamp: Date.now()
       } 
     };

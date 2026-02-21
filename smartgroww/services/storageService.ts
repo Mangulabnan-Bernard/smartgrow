@@ -19,24 +19,12 @@ const STORAGE_KEYS = {
   USER_STATS: 'smartgrow_user_stats'
 };
 
-// Helper to sync data with cloud
-const syncToCloud = async (dataType: 'scans' | 'monitoring' | 'alerts' | 'stats', data: any) => {
-  const user = firebaseService.getCurrentUser();
-  if (user) {
-    try {
-      await firebaseService.saveUserData(user.uid, dataType, data);
-    } catch (error) {
-      console.error('Failed to sync to cloud:', error);
-    }
-  }
-};
-
 export const storageService = {
   getScans: (): DiagnosisResult[] => {
     const data = localStorage.getItem(getUserKey(STORAGE_KEYS.SCANS));
     return data ? JSON.parse(data) : [];
   },
-  saveScan: async (scan: DiagnosisResult) => {
+  saveScan: (scan: DiagnosisResult) => {
     const scans = storageService.getScans();
     const index = scans.findIndex(s => s.id === scan.id);
     if (index >= 0) {
@@ -45,27 +33,24 @@ export const storageService = {
       scans.unshift(scan);
     }
     localStorage.setItem(getUserKey(STORAGE_KEYS.SCANS), JSON.stringify(scans));
-    await syncToCloud('scans', scans);
   },
-  toggleArchiveScan: async (id: string) => {
+  toggleArchiveScan: (id: string) => {
     const scans = storageService.getScans();
     const index = scans.findIndex(s => s.id === id);
     if (index >= 0) {
       scans[index].archived = !scans[index].archived;
       localStorage.setItem(getUserKey(STORAGE_KEYS.SCANS), JSON.stringify(scans));
-      await syncToCloud('scans', scans);
     }
   },
-  deleteScan: async (id: string) => {
+  deleteScan: (id: string) => {
     const scans = storageService.getScans().filter(s => s.id !== id);
     localStorage.setItem(getUserKey(STORAGE_KEYS.SCANS), JSON.stringify(scans));
-    await syncToCloud('scans', scans);
   },
   getMonitoring: (): MonitoringSession[] => {
     const data = localStorage.getItem(getUserKey(STORAGE_KEYS.MONITORING));
     return data ? JSON.parse(data) : [];
   },
-  saveMonitoring: async (session: MonitoringSession) => {
+  saveMonitoring: (session: MonitoringSession) => {
     const sessions = storageService.getMonitoring();
     const index = sessions.findIndex(s => s.id === session.id);
     if (index >= 0) {
@@ -74,12 +59,10 @@ export const storageService = {
       sessions.push(session);
     }
     localStorage.setItem(getUserKey(STORAGE_KEYS.MONITORING), JSON.stringify(sessions));
-    await syncToCloud('monitoring', sessions);
   },
-  deleteSession: async (id: string) => {
+  deleteSession: (id: string) => {
     const sessions = storageService.getMonitoring().filter(s => s.id !== id);
     localStorage.setItem(getUserKey(STORAGE_KEYS.MONITORING), JSON.stringify(sessions));
-    await syncToCloud('monitoring', sessions);
   },
   getUserStats: (): UserStats => {
     const data = localStorage.getItem(getUserKey(STORAGE_KEYS.USER_STATS));
@@ -93,58 +76,22 @@ export const storageService = {
       lastAction: 'Welcome to SmartGrow!'
     };
   },
-  saveUserStats: async (stats: UserStats) => {
+  saveUserStats: (stats: UserStats) => {
     localStorage.setItem(getUserKey(STORAGE_KEYS.USER_STATS), JSON.stringify(stats));
-    await syncToCloud('stats', stats);
   },
   getAlerts: (): AppAlert[] => {
     const data = localStorage.getItem(getUserKey(STORAGE_KEYS.ALERTS));
     return data ? JSON.parse(data) : [];
   },
-  saveAlerts: async (alerts: AppAlert[]) => {
+  saveAlerts: (alerts: AppAlert[]) => {
     localStorage.setItem(getUserKey(STORAGE_KEYS.ALERTS), JSON.stringify(alerts));
-    await syncToCloud('alerts', alerts);
   },
-  addAlert: async (alert: AppAlert) => {
+  addAlert: (alert: AppAlert) => {
     const alerts = storageService.getAlerts();
-    const updatedAlerts = [alert, ...alerts];
-    localStorage.setItem(getUserKey(STORAGE_KEYS.ALERTS), JSON.stringify(updatedAlerts));
-    await syncToCloud('alerts', updatedAlerts);
+    localStorage.setItem(getUserKey(STORAGE_KEYS.ALERTS), JSON.stringify([alert, ...alerts]));
   },
-  clearAlerts: async () => {
+  clearAlerts: () => {
     localStorage.setItem(getUserKey(STORAGE_KEYS.ALERTS), JSON.stringify([]));
-    await syncToCloud('alerts', []);
-  },
-  // Sync data from cloud to local storage
-  syncFromCloud: async () => {
-    const user = firebaseService.getCurrentUser();
-    if (user) {
-      try {
-        const cloudData = await firebaseService.syncDataFromCloud(user.uid);
-        
-        if (cloudData.scans && cloudData.scans.length > 0) {
-          localStorage.setItem(getUserKey(STORAGE_KEYS.SCANS), JSON.stringify(cloudData.scans));
-        }
-        
-        if (cloudData.monitoring && cloudData.monitoring.length > 0) {
-          localStorage.setItem(getUserKey(STORAGE_KEYS.MONITORING), JSON.stringify(cloudData.monitoring));
-        }
-        
-        if (cloudData.alerts && cloudData.alerts.length > 0) {
-          localStorage.setItem(getUserKey(STORAGE_KEYS.ALERTS), JSON.stringify(cloudData.alerts));
-        }
-        
-        if (cloudData.stats) {
-          localStorage.setItem(getUserKey(STORAGE_KEYS.USER_STATS), JSON.stringify(cloudData.stats));
-        }
-        
-        return cloudData;
-      } catch (error) {
-        console.error('Failed to sync from cloud:', error);
-        return null;
-      }
-    }
-    return null;
   },
   // Clear all user-specific data (useful for testing or data migration)
   clearUserData: () => {

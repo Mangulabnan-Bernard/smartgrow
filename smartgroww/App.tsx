@@ -32,9 +32,8 @@ import Analytics from './components/Analytics';
 import AuthModal from './components/AuthModal';
 import Archived from './components/Archived';
 import LoadingScreen from './components/LoadingScreen';
-import ConfirmModal from './components/ConfirmModal';
 import { storageService } from './services/storageService';
-import { firebaseService } from './services/firebaseService';
+import { requestNotificationPermission, onMessageListener } from './services/firebase';
 import { DiagnosisResult, MonitoringSession, AppAlert, UserStats, Language, EnvironmentalData, Page } from './types';
 import { TRANSLATIONS, THEME_CONFIGS } from './constants';
 
@@ -52,26 +51,13 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('en');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     // Check if Firebase user is authenticated
-    return firebaseService.isAuthenticated();
+    return false; // Will be updated by auth state listener
   });
   const [activeDiagnosis, setActiveDiagnosis] = useState<DiagnosisResult | null>(null);
   const [monitoringCtx, setMonitoringCtx] = useState<MonitoringContext | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [confirmModal, setConfirmModal] = useState<{
-    isOpen: boolean;
-    onConfirm: () => void;
-    title: string;
-    message: string;
-    confirmText?: string;
-    type?: 'delete' | 'warning' | 'info';
-  }>({
-    isOpen: false,
-    onConfirm: () => {},
-    title: '',
-    message: ''
-  });
   
   const [envData, setEnvData] = useState<EnvironmentalData>({
     temperature: 28.4,
@@ -80,61 +66,6 @@ const App: React.FC = () => {
     light: 840
   });
 
-  const NotificationPanel = () => {
-    const visibleAlerts = alerts.slice(0, 6);
-    return (
-      <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsNotificationOpen(false)}></div>
-          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[80vh] animate-in slide-in-from-bottom-5 duration-300">
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                  <div>
-                      <h3 className="text-xl font-black text-slate-800">Notifications</h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Recent activity</p>
-                  </div>
-                  <button onClick={() => setIsNotificationOpen(false)} className="p-2.5 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-200">
-                      <X className="w-5 h-5" />
-                  </button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
-                  {visibleAlerts.length === 0 ? (
-                      <div className="py-20 text-center space-y-4">
-                          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
-                              <Bell className="w-8 h-8 text-slate-200" />
-                          </div>
-                          <p className="text-slate-400 font-medium italic">No notifications yet.</p>
-                      </div>
-                  ) : (
-                      visibleAlerts.map(alert => (
-                          <div key={alert.id} className={`p-5 rounded-3xl border flex gap-4 ${
-                              alert.severity === 'warning' ? 'bg-orange-50 border-orange-100' : 
-                              alert.severity === 'error' ? 'bg-red-50 border-red-100' : 'bg-blue-50 border-blue-100'
-                          }`}>
-                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-                                  alert.severity === 'warning' ? 'bg-white text-orange-500 shadow-orange-200/50' : 
-                                  alert.severity === 'error' ? 'bg-white text-red-500 shadow-red-200/50' : 'bg-white text-blue-500 shadow-blue-200/50'
-                              } shadow-lg`}>
-                                  {alert.title.toLowerCase().includes('heat') ? <Thermometer className="w-5 h-5" /> : 
-                                   alert.title.toLowerCase().includes('water') ? <Droplets className="w-5 h-5" /> :
-                                   alert.title.toLowerCase().includes('recovery') ? <CheckCircle2 className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                  <div className="flex justify-between items-start mb-0.5">
-                                      <h4 className="font-black text-slate-800 text-sm truncate pr-2">{alert.title}</h4>
-                                      <span className="text-[8px] font-black text-slate-400 whitespace-nowrap uppercase">
-                                          {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                      </span>
-                                  </div>
-                                  <p className="text-xs text-slate-600 font-medium leading-relaxed">{alert.message}</p>
-                              </div>
-                          </div>
-                      ))
-                  )}
-              </div>
-          </div>
-      </div>
-    );
-  };
-
   // Apply Theme CSS Variables
   useEffect(() => {
     const themeKey = userStats.themeColor || 'green';
@@ -142,7 +73,7 @@ const App: React.FC = () => {
     const root = document.documentElement;
     
     Object.entries(config).forEach(([key, value]) => {
-      root.style.setProperty(`--primary-${key}`, String(value));
+      root.style.setProperty(`--primary-${key}`, value);
     });
   }, [userStats.themeColor]);
 
@@ -155,38 +86,35 @@ const App: React.FC = () => {
   // Initialize app and check Firebase auth state
   useEffect(() => {
     const initializeApp = async () => {
-      // Wait for Firebase auth to initialize
-      await firebaseService.waitForAuthInit();
-      
-      // Check Firebase auth state
-      const user = firebaseService.getCurrentUser();
-      if (user) {
-        const profile = firebaseService.getUserProfile(user.uid);
-        if (profile) {
-          // Sync data from cloud first
-          const cloudData = await storageService.syncFromCloud();
-          
-          // Load user stats (prefer cloud data if available)
-          let stats;
-          if (cloudData?.stats) {
-            stats = cloudData.stats;
-            setUserStats(stats);
-            localStorage.setItem('smartgrow_user_stats', JSON.stringify(stats));
-          } else {
-            const existingStats = localStorage.getItem(`smartgrow_stats_${profile.uid}`);
-            if (existingStats) {
-              stats = JSON.parse(existingStats);
-              setUserStats(stats);
-              localStorage.setItem('smartgrow_user_stats', existingStats);
-            }
-          }
-          
-          setIsAuthenticated(true);
-        }
+      // Initialize Firebase Analytics
+      if (typeof window !== 'undefined') {
+        const { getAnalytics } = await import('firebase/analytics');
+        const analytics = getAnalytics();
+        console.log('Firebase Analytics initialized');
       }
       
+      // Request notification permission
+      requestNotificationPermission().then(result => {
+        if (result) {
+          console.log('FCM Token obtained:', result);
+        }
+      });
+      
+      // Set up push message listener
+      onMessageListener().then(payload => {
+        if (payload) {
+          console.log('Push message received:', payload);
+          // Show in-app notification for foreground messages
+          addAlert(
+            payload.notification?.title || 'SmartGrow AI Alert', 
+            payload.notification?.body || 'You have a new notification', 
+            'info'
+          );
+        }
+      });
+      
       // Simulate app initialization
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       setIsLoading(false);
     };
     
@@ -254,26 +182,6 @@ const App: React.FC = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const showConfirmModal = (config: {
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    confirmText?: string;
-    type?: 'delete' | 'warning' | 'info';
-  }) => {
-    setConfirmModal({
-      isOpen: true,
-      onConfirm: () => {
-        config.onConfirm();
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      },
-      title: config.title,
-      message: config.message,
-      confirmText: config.confirmText,
-      type: config.type
-    });
-  };
-
   const handleUpdateStats = (newStats: UserStats) => {
     setUserStats(newStats);
     storageService.saveUserStats(newStats);
@@ -281,95 +189,26 @@ const App: React.FC = () => {
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
-    const user = firebaseService.getCurrentUser();
-    if (user) {
-      const profile = firebaseService.getUserProfile(user.uid);
-      if (profile) {
-        const stats = storageService.getUserStats();
-        setUserStats(stats);
-        showToast('Login Successful!');
-        const name = formatName(stats.fullName || stats.username);
-        addAlert('Welcome aboard!', `Hey ${name}, we're ready to grow!`, 'info');
-      }
-    }
+    showToast('Login Successful!');
+    addAlert('Welcome aboard!', `Hey User, we're ready to grow!`, 'info');
   };
 
   const handleLogout = async () => {
     try {
-      await firebaseService.signOut();
+      // Add logout logic here if needed
       setIsAuthenticated(false);
       setCurrentPage('dashboard');
-      // Clear current user session
-      localStorage.removeItem('smartgrow_current_user');
+      showToast('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
       // Still logout locally even if Firebase fails
       setIsAuthenticated(false);
       setCurrentPage('dashboard');
-      localStorage.removeItem('smartgrow_current_user');
     }
-  };
-
-  const handleArchiveScan = (id: string) => {
-    storageService.toggleArchiveScan(id);
-    setScans(storageService.getScans());
-    showToast('Moved to Archive');
-  };
-
-  const handleDeleteScan = (id: string) => {
-    const scan = scans.find(s => s.id === id);
-    const scanName = scan?.plantName || 'this scan';
-    
-    setConfirmModal({
-      isOpen: true,
-      onConfirm: () => {
-        storageService.deleteScan(id);
-        setScans(storageService.getScans());
-        showToast('Deleted from history');
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      },
-      title: 'Delete Scan',
-      message: `Are you sure you want to delete "${scanName}" from your history? This action cannot be undone.`,
-      confirmText: 'Delete',
-      type: 'delete'
-    });
-  };
-
-  const handleDeleteSession = (id: string) => {
-    const session = sessions.find(s => s.id === id);
-    const sessionName = session?.plantName || `Session ${id.slice(0, 8)}`;
-    
-    setConfirmModal({
-      isOpen: true,
-      onConfirm: () => {
-        storageService.deleteSession(id);
-        setSessions(storageService.getMonitoring());
-        showToast('Session deleted');
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      },
-      title: 'Delete Monitoring Session',
-      message: `Are you sure you want to delete the monitoring session for "${sessionName}"? This will remove all tracking data and cannot be undone.`,
-      confirmText: 'Delete',
-      type: 'delete'
-    });
   };
 
   const handleSaveDiagnosis = (result: DiagnosisResult, startMonitoring: boolean) => {
     const XP_TARGET = userStats.level * 1000;
-    
-    // Check if this scan already exists to prevent duplicates
-    const existingScan = scans.find(s => 
-      s.id === result.id || // Same ID
-      (s.plantName === result.plantName && 
-       s.diagnosis === result.diagnosis && 
-       Math.abs(s.timestamp - (result.timestamp || Date.now())) < 1000) // Within 1 second
-    );
-    
-    if (existingScan && !monitoringCtx) {
-      showToast('Already saved!');
-      setActiveDiagnosis(null);
-      return;
-    }
     
     if (monitoringCtx) {
       const updatedSessions = sessions.map(s => {
@@ -417,9 +256,7 @@ const App: React.FC = () => {
         showToast(`Rank Up! Level ${newStats.level}`);
       }
       handleUpdateStats(newStats);
-    }
-    
-    if (!monitoringCtx) {
+    } else {
       storageService.saveScan(result);
       setScans(prev => [result, ...prev]);
       
@@ -438,7 +275,7 @@ const App: React.FC = () => {
 
       if (startMonitoring) {
         const newSession: MonitoringSession = {
-          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: Math.random().toString(36).substr(2, 9),
           plantName: result.plantName,
           startDate: Date.now(),
           currentDay: 2,
@@ -458,12 +295,97 @@ const App: React.FC = () => {
     }
     setActiveDiagnosis(null);
   };
-  if (!isAuthenticated) {
-    return <AuthModal lang={language} onSuccess={handleAuthSuccess} />;
-  }
 
-  if (isLoading) {
-    return <LoadingScreen message="Growing your garden..." />;
+  const handleArchiveScan = (id: string) => {
+    storageService.toggleArchiveScan(id);
+    setScans(storageService.getScans());
+    showToast('Moved to Archive');
+  };
+
+  const handleDeleteScan = (id: string) => {
+    const scan = scans.find(s => s.id === id);
+    const scanName = scan?.plantName || 'this scan';
+    
+    if (confirm(`Delete "${scanName}" from history?`)) {
+      storageService.deleteScan(id);
+      setScans(storageService.getScans());
+      showToast('Deleted from history');
+    }
+  };
+
+  const handleDeleteSession = (id: string) => {
+    const session = sessions.find(s => s.id === id);
+    const sessionName = session?.plantName || `Session ${id.slice(0, 8)}`;
+    
+    if (confirm(`Delete "${sessionName}" monitoring session?`)) {
+      storageService.deleteSession(id);
+      setSessions(storageService.getMonitoring());
+      showToast('Session deleted');
+    }
+  };
+
+  const NotificationPanel = () => {
+    const visibleAlerts = alerts.slice(0, 8);
+    return (
+      <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsNotificationOpen(false)}></div>
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[80vh] animate-in slide-in-from-bottom-5 duration-300">
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                  <div>
+                      <h3 className="text-xl font-black text-slate-800">Notifications</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Recent activity</p>
+                  </div>
+                  <button onClick={() => setIsNotificationOpen(false)} className="p-2.5 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-200">
+                      <X className="w-5 h-5" />
+                  </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+                  {visibleAlerts.length === 0 ? (
+                      <div className="py-20 text-center space-y-4">
+                          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
+                              <Bell className="w-8 h-8 text-slate-200" />
+                          </div>
+                          <p className="text-slate-400 font-medium italic">No notifications yet.</p>
+                      </div>
+                  ) : (
+                      visibleAlerts.map(alert => (
+                          <div key={alert.id} className={`p-5 rounded-3xl border flex gap-4 ${
+                              alert.severity === 'warning' ? 'bg-orange-50 border-orange-100' : 
+                              alert.severity === 'error' ? 'bg-red-50 border-red-100' : 'bg-blue-50 border-blue-100'
+                          }`}>
+                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                                  alert.severity === 'warning' ? 'bg-white text-orange-500 shadow-orange-200/50' : 
+                                  alert.severity === 'error' ? 'bg-white text-red-500 shadow-red-200/50' : 'bg-white text-blue-500 shadow-blue-200/50'
+                              } shadow-lg`}>
+                                  {alert.title.toLowerCase().includes('heat') ? <Thermometer className="w-5 h-5" /> : 
+                                   alert.title.toLowerCase().includes('water') ? <Droplets className="w-5 h-5" /> :
+                                   alert.title.toLowerCase().includes('recovery') ? <CheckCircle2 className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                  <div className="flex justify-between items-start mb-0.5">
+                                      <h4 className="font-black text-slate-800 text-sm truncate pr-2">{alert.title}</h4>
+                                      <span className="text-[8px] font-black text-slate-400 whitespace-nowrap uppercase">
+                                          {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                      </span>
+                                  </div>
+                                  <p className="text-xs text-slate-600 font-medium leading-relaxed">{alert.message}</p>
+                              </div>
+                          </div>
+                      ))
+                  )}
+              </div>
+          </div>
+      </div>
+    );
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <AuthModal 
+        lang={language} 
+        onSuccess={handleAuthSuccess} 
+      />
+    );
   }
 
   const navItems = [
@@ -472,6 +394,11 @@ const App: React.FC = () => {
     { id: 'history', icon: History, label: TRANSLATIONS[language].history },
     { id: 'profile', icon: SettingsIcon, label: TRANSLATIONS[language].settings },
   ];
+
+  // Show loading screen initially
+  if (isLoading) {
+    return <LoadingScreen message="Authenticating with SmartGrow AI..." />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 pb-32 md:pb-0 md:pl-64 safe-area-inset-top safe-area-inset-bottom pwa-full-height">
@@ -503,9 +430,9 @@ const App: React.FC = () => {
         <div className="mt-auto pt-6 border-t border-[var(--primary-800)]">
           <button 
             onClick={() => {
-              const newLang = language === 'en' ? 'tl' : 'en';
-              setLanguage(newLang);
-              handleUpdateStats({...userStats, lastAction: `Changed language to ${newLang === 'en' ? 'English' : 'Tagalog'}`});
+                const newLang = language === 'en' ? 'tl' : 'en';
+                setLanguage(newLang);
+                handleUpdateStats({...userStats, lastAction: `Changed language to ${newLang === 'en' ? 'English' : 'Tagalog'}`});
             }}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 text-[var(--primary-100)] transition-all text-sm font-bold"
           >
@@ -532,7 +459,21 @@ const App: React.FC = () => {
         {currentPage === 'scanner' && (
           <Scanner 
             lang={language}
-            onResult={(res) => { setActiveDiagnosis({ ...res, environment: { ...envData } } as DiagnosisResult); setCurrentPage('dashboard'); }}
+            onResult={(res) => { 
+              // Add alert for new plant analysis
+              if (res.severity === 'Severe') {
+                addAlert('🚨 SmartGrow AI Alert!', `${res.plantName} needs immediate attention! ${res.diagnosis}`, 'error');
+              } else if (res.severity === 'Moderate') {
+                addAlert('⚠️ SmartGrow AI Warning', `${res.plantName} shows moderate symptoms: ${res.diagnosis}`, 'warning');
+              } else if (res.severity === 'Mild') {
+                addAlert('🌱 SmartGrow AI Check', `${res.plantName} has mild symptoms: ${res.diagnosis}`, 'info');
+              } else if (res.severity === 'Healthy') {
+                addAlert('✅ SmartGrow AI Healthy!', `${res.plantName} is in great condition!`, 'info');
+              }
+              
+              setActiveDiagnosis({ ...res, environment: { ...envData } } as DiagnosisResult); 
+              setCurrentPage('dashboard'); 
+            }}
             onBack={() => setCurrentPage('dashboard')}
           />
         )}
@@ -552,7 +493,6 @@ const App: React.FC = () => {
                 sessions={sessions}
                 lang={language}
                 onScanForDay={(sessionId, day) => { setMonitoringCtx({ sessionId, day }); setCurrentPage('scanner'); }}
-                onViewPastScan={(sessionId, day, record) => { setActiveDiagnosis(record.result); setCurrentPage('dashboard'); }}
                 onArchiveSession={(id) => {
                 const updated = sessions.map(s => s.id === id ? { ...s, status: 'Archived' as const } : s);
                 setSessions(updated);
@@ -561,7 +501,6 @@ const App: React.FC = () => {
                 handleUpdateStats({...userStats, lastAction: `Archived session for ${session?.plantName}`});
                 showToast('Archived');
                 }}
-                onShowConfirmModal={showConfirmModal}
             />
           </div>
         )}
@@ -577,10 +516,10 @@ const App: React.FC = () => {
                     {alerts.length > 0 && <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></div>}
                  </button>
             </div>
-            <div className="grid gap-6">
-              {scans.filter(s => !s.archived).map((scan, index) => (
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {scans.filter(s => !s.archived).map(scan => (
                 <div 
-                  key={`${scan.id}-${index}`} 
+                  key={scan.id} 
                   className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center gap-6 hover:border-[var(--primary-200)] transition-all shadow-sm hover:shadow-md group"
                 >
                   <button 
@@ -690,16 +629,6 @@ const App: React.FC = () => {
           {toast.message}
         </div>
       )}
-
-      <ConfirmModal
-        isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-        onConfirm={confirmModal.onConfirm}
-        title={confirmModal.title}
-        message={confirmModal.message}
-        confirmText={confirmModal.confirmText}
-        type={confirmModal.type}
-      />
     </div>
   );
 };
