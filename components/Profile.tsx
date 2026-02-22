@@ -103,11 +103,13 @@ const Profile: React.FC<ProfileProps> = ({
   };
 
   const handleThemeChange = (themeId: string) => {
+    console.log('Theme change requested:', themeId);
     onUpdateStats({
       ...stats,
       themeColor: themeId,
       lastAction: `Changed theme to ${themeId}`
     });
+    console.log('Theme change completed');
   };
 
   const formatName = (name: string) => {

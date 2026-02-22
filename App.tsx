@@ -48,7 +48,14 @@ const App: React.FC = () => {
   const [scans, setScans] = useState<DiagnosisResult[]>([]);
   const [sessions, setSessions] = useState<MonitoringSession[]>([]);
   const [alerts, setAlerts] = useState<AppAlert[]>([]);
-  const [userStats, setUserStats] = useState<UserStats>(storageService.getUserStats());
+  const [userStats, setUserStats] = useState<UserStats>(() => {
+    const stats = storageService.getUserStats();
+    // Ensure themeColor has a default value
+    if (!stats.themeColor) {
+      stats.themeColor = 'green';
+    }
+    return stats;
+  });
   const [language, setLanguage] = useState<Language>('en');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     // Check if Firebase user is authenticated
@@ -138,11 +145,19 @@ const App: React.FC = () => {
   // Apply Theme CSS Variables
   useEffect(() => {
     const themeKey = userStats.themeColor || 'green';
-    const config = THEME_CONFIGS[themeKey] || THEME_CONFIGS.green;
     const root = document.documentElement;
-    
-    Object.entries(config).forEach(([key, value]) => {
-      root.style.setProperty(`--primary-${key}`, String(value));
+
+    // Remove all existing theme classes
+    root.classList.remove('theme-green', 'theme-blue', 'theme-purple', 'theme-rose', 'theme-orange', 'theme-teal');
+
+    // Add the current theme class
+    root.classList.add(`theme-${themeKey}`);
+
+    console.log('Applied theme class:', `theme-${themeKey}`);
+    console.log('Root element classes:', root.className);
+    console.log('CSS variables after class application:', {
+      'primary-600': getComputedStyle(root).getPropertyValue('--primary-600'),
+      'primary-500': getComputedStyle(root).getPropertyValue('--primary-500')
     });
   }, [userStats.themeColor]);
 
