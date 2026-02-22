@@ -173,7 +173,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, lang }) => {
                     type="text" 
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="John Doe" 
+                    placeholder="name" 
                     required={!isLogin}
                     className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
                   />
@@ -189,7 +189,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, lang }) => {
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john@example.com" 
+                  placeholder="enter your email" 
                   required
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
                 />

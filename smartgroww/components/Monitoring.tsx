@@ -12,7 +12,7 @@ interface MonitoringProps {
 }
 
 const Monitoring: React.FC<MonitoringProps> = ({ sessions, lang, onScanForDay, onArchiveSession }) => {
-  const activeSessions = sessions.filter(s => s.status === 'Active');
+  const activeSessions = sessions.filter(s => s.status === 'Active').sort((a, b) => b.startDate - a.startDate);
   const t = TRANSLATIONS[lang];
 
   const handleArchiveWithConfirm = (id: string, name: string) => {

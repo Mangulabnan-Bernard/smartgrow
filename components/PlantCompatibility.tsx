@@ -98,6 +98,21 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
               <p className="text-slate-700 text-xs leading-relaxed font-bold mb-3">
                 {selected.hybridInfo || "Standard growth rules. This plant does not mix easily with others."}
               </p>
+              {selected.hybrids && selected.hybrids.length > 0 && (
+                <div className="mb-3">
+                  <h5 className="text-xs font-black text-[var(--primary-700)] uppercase tracking-widest mb-2">Can Hybrid With:</h5>
+                  <div className="flex flex-wrap gap-2">
+                    {selected.hybrids.map(hybridId => {
+                      const hybridPlant = PLANT_GUIDE_DATA.find(p => p.id === hybridId);
+                      return hybridPlant ? (
+                        <span key={hybridId} className="px-3 py-1 bg-[var(--primary-600)] text-white rounded-lg text-xs font-bold border border-[var(--primary-700)]">
+                          {hybridPlant.name}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
               <div className="bg-white/50 p-3 rounded-xl border border-[var(--primary-100)]">
                 <div className="flex items-center gap-2 text-[var(--primary-600)]">
                   <Dna className="w-4 h-4" />

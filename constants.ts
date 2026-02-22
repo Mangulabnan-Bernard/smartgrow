@@ -192,7 +192,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Basil', 'Marigold', 'Carrots', 'Onions'], 
     avoid: ['Cabbage', 'Corn', 'Potatoes'], 
     tips: 'Needs lots of sun and water. Cut extra stems to help air flow.',
-    hybridInfo: 'Can mix with other tomatoes. Keep them 10 feet apart if you want to keep seeds pure. You can join them to eggplant roots.'
+    hybridInfo: 'Can mix with other tomatoes. Keep them 10 feet apart if you want to keep seeds pure. You can join them to eggplant roots.',
+    hybrids: ['eggplant']
   },
   { 
     id: 'pepper', 
@@ -201,7 +202,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Onions', 'Basil', 'Carrots', 'Coriander'], 
     avoid: ['Beans', 'Kale', 'Fennel'], 
     tips: 'Keep soil wet but not too much water. Peppers like heat.',
-    hybridInfo: 'Hot and sweet peppers can mix. If they mix, your sweet peppers might taste spicy next year.'
+    hybridInfo: 'Hot and sweet peppers can mix. If they mix, your sweet peppers might taste spicy next year.',
+    hybrids: []
   },
   { 
     id: 'cucumber', 
@@ -210,7 +212,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Beans', 'Corn', 'Peas', 'Radishes'], 
     avoid: ['Potatoes', 'Sage', 'Strong Herbs'], 
     tips: 'Needs something to climb on. Needs lots of water.',
-    hybridInfo: 'Can mix with melons or other cucumbers if bees are nearby. Needs bees to make fruit.'
+    hybridInfo: 'Can mix with melons or other cucumbers if bees are nearby. Needs bees to make fruit.',
+    hybrids: []
   },
   { 
     id: 'eggplant', 
@@ -219,7 +222,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Beans', 'Peppers', 'Spinach', 'Thyme'], 
     avoid: ['None specifically'], 
     tips: 'Likes rich soil and lots of sun. Watch for tiny bugs.',
-    hybridInfo: 'Polinates itself but bees help. Can mix with wild nightshade plants.'
+    hybridInfo: 'Polinates itself but bees help. Can mix with wild nightshade plants.',
+    hybrids: ['tomato']
   },
   { 
     id: 'strawberry', 
@@ -228,7 +232,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Borage', 'Beans', 'Lettuce', 'Spinach'], 
     avoid: ['Cabbage', 'Broccoli', 'Cauliflower'], 
     tips: 'Needs soil that lets water out. Put straw on the ground to keep fruit clean.',
-    hybridInfo: 'Grows from seeds or baby plants. Different kinds of strawberries usually do not mix easily.'
+    hybridInfo: 'Grows from seeds or baby plants. Different kinds of strawberries usually do not mix easily.',
+    hybrids: []
   },
   { 
     id: 'basil', 
@@ -237,7 +242,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Tomato', 'Peppers', 'Asparagus', 'Oregano'], 
     avoid: ['Rue', 'Sage'], 
     tips: 'Cut off flowers so the leaves keep growing. Likes warm weather.',
-    hybridInfo: 'Different basils mix very easily. High chance of making a new "mystery" basil if they flower together.'
+    hybridInfo: 'Different basils mix very easily. High chance of making a new "mystery" basil if they flower together.',
+    hybrids: []
   },
   { 
     id: 'monstera', 
@@ -246,7 +252,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Pothos', 'Philodendron'], 
     avoid: ['None'], 
     tips: 'A climbing plant. Clean the leaves so they can breathe better.',
-    hybridInfo: 'Mixing needs help by hand. Rare white-leaf versions only grow from stem cuttings.'
+    hybridInfo: 'Mixing needs help by hand. Rare white-leaf versions only grow from stem cuttings.',
+    hybrids: []
   },
   { 
     id: 'rose', 
@@ -255,7 +262,8 @@ export const PLANT_GUIDE_DATA = [
     companions: ['Garlic', 'Chives', 'Lavender', 'Marigold'], 
     avoid: ['None'], 
     tips: 'Water at the bottom, not on leaves. Cut back in early spring.',
-    hybridInfo: 'Most garden roses are already mixed. We usually use "root-joining" to grow new ones that look the same.'
+    hybridInfo: 'Most garden roses are already mixed. We usually use "root-joining" to grow new ones that look the same.',
+    hybrids: []
   }
 ];
 
