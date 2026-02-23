@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Info, Check, X, Leaf, Search, Dna, Beaker, Sparkles } from 'lucide-react';
 import { PLANT_GUIDE_DATA, TRANSLATIONS } from '../constants';
 import { Language } from '../types';
@@ -13,6 +13,11 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
   const [selected, setSelected] = useState(PLANT_GUIDE_DATA[0]);
   const [search, setSearch] = useState('');
   const t = TRANSLATIONS[lang];
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const filteredPlants = PLANT_GUIDE_DATA.filter(p => 
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -100,7 +105,7 @@ const PlantCompatibility: React.FC<PlantCompatibilityProps> = ({ lang, onBack })
               </p>
               {selected.hybrids && selected.hybrids.length > 0 && (
                 <div className="mb-3">
-                  <h5 className="text-xs font-black text-[var(--primary-700)] uppercase tracking-widest mb-2">Can Hybrid With:</h5>
+                  <h5 className="text-xs font-black text-[var(--primary-700)] uppercase tracking-widest mb-2">Plants can hybrid with:</h5>
                   <div className="flex flex-wrap gap-2">
                     {selected.hybrids.map(hybridId => {
                       const hybridPlant = PLANT_GUIDE_DATA.find(p => p.id === hybridId);

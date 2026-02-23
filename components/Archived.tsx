@@ -118,7 +118,7 @@ const Archived: React.FC<ArchivedProps> = ({ lang, scans, sessions, onRestoreSca
 
       {/* Confirmation Modal */}
       {confirmTarget && (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setConfirmTarget(null)}></div>
           <div className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl relative overflow-hidden p-8 text-center animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">

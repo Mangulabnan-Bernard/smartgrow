@@ -7,7 +7,8 @@ import {
   onAuthStateChanged,
   User,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  authStateReady
 } from 'firebase/auth';
 import { 
   getFirestore,
@@ -244,4 +245,5 @@ class FirebaseService {
 }
 
 export const firebaseService = new FirebaseService();
+export const waitForAuthInit = () => firebaseService.waitForAuthInit();
 export default firebaseService;

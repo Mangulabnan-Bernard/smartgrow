@@ -45,6 +45,7 @@ interface MonitoringContext {
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [prevPage, setPrevPage] = useState<Page | null>(null);
   const [scans, setScans] = useState<DiagnosisResult[]>([]);
   const [sessions, setSessions] = useState<MonitoringSession[]>([]);
   const [alerts, setAlerts] = useState<AppAlert[]>([]);
@@ -66,6 +67,7 @@ const App: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     onConfirm: () => void;
@@ -86,6 +88,21 @@ const App: React.FC = () => {
     soilMoisture: 45,
     light: 840
   });
+
+  // Navigation functions
+  const navigateTo = (page: Page) => {
+    setPrevPage(currentPage);
+    setCurrentPage(page);
+  };
+
+  const goBack = () => {
+    if (prevPage) {
+      setCurrentPage(prevPage);
+      setPrevPage(null);
+    } else {
+      setCurrentPage('dashboard');
+    }
+  };
 
   const NotificationPanel = () => {
     const visibleAlerts = alerts.slice(0, 6);
@@ -203,6 +220,12 @@ const App: React.FC = () => {
       // Simulate app initialization
       await new Promise(resolve => setTimeout(resolve, 1000));
       setIsLoading(false);
+
+      // If not authenticated, show login loading
+      if (!firebaseService.isAuthenticated()) {
+        setLoginLoading(true);
+        setTimeout(() => setLoginLoading(false), 2000);
+      }
     };
     
     initializeApp();
@@ -474,6 +497,9 @@ const App: React.FC = () => {
     setActiveDiagnosis(null);
   };
   if (!isAuthenticated) {
+    if (loginLoading) {
+      return <LoadingScreen message="Preparing login..." />;
+    }
     return <AuthModal lang={language} onSuccess={handleAuthSuccess} />;
   }
 
@@ -611,7 +637,13 @@ const App: React.FC = () => {
                     </div>
                   </button>
                   <button 
-                    onClick={() => handleArchiveScan(scan.id)}
+                    onClick={() => showConfirmModal({
+                      title: 'Archive Scan?',
+                      message: 'This will move the scan to archive. You can restore it later.',
+                      onConfirm: () => handleArchiveScan(scan.id),
+                      confirmText: 'Archive',
+                      type: 'warning'
+                    })}
                     className="p-3 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
                     title="Archive"
                   >
@@ -640,7 +672,7 @@ const App: React.FC = () => {
             }}
             onLogout={handleLogout}
             onUpdateStats={handleUpdateStats}
-            onOpenArchive={() => setCurrentPage('archived')}
+            onOpenArchive={() => navigateTo('archived')}
             onOpenNotifications={() => setIsNotificationOpen(true)}
           />
         )}
@@ -652,15 +684,15 @@ const App: React.FC = () => {
             onRestoreScan={handleArchiveScan}
             onDeleteScan={handleDeleteScan}
             onDeleteSession={handleDeleteSession}
-            onBack={() => setCurrentPage('profile')}
+            onBack={goBack}
           />
         )}
         {currentPage === 'compatibility' && <PlantCompatibility lang={language} onBack={() => {
-             setCurrentPage('dashboard');
+             goBack();
              handleUpdateStats({...userStats, lastAction: 'Explored plant guide'});
         }} />}
         {currentPage === 'analytics' && <Analytics scans={scans} sessions={sessions} onBack={() => {
-            setCurrentPage('dashboard');
+            goBack();
             handleUpdateStats({...userStats, lastAction: 'Reviewed analytics'});
         }} />}
       </main>
